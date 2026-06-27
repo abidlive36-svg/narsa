@@ -18,13 +18,26 @@
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
     </div>
 
-    <audio id="sound-correct" src="static/sounds/correct.mp3"></audio>
-    <audio id="sound-wrong" src="static/sounds/wrong.mp3"></audio>
     <audio id="audio-q"></audio>
     <audio id="audio-exp"></audio>
 
-    <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="md:col-span-3 flex flex-col gap-4">
+    <!-- Main Container matching image_dd115e.jpg -->
+    <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+        
+        <!-- Left Sidebar: Controls -->
+        <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-6">
+            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+            <div class="grid grid-cols-2 gap-2">
+                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
+                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
+                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
+                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
+            </div>
+            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
+        </div>
+
+        <!-- Right Side: Image and Question -->
+        <div class="md:col-span-2 flex flex-col gap-4">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
             </div>
@@ -32,16 +45,6 @@
                 <p id="q-text" class="text-xl font-bold mb-4">يرجى الضغط على ابدأ...</p>
                 <div id="options" class="space-y-3"></div>
             </div>
-        </div>
-
-        <div class="md:col-span-1 glass rounded-xl p-4 flex flex-col gap-4 border border-slate-700">
-            <div id="choices" class="grid grid-cols-2 gap-2">
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
-            </div>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold">Valider</button>
         </div>
     </div>
 
@@ -59,10 +62,7 @@
 
         function loadQ() {
             selected = [];
-            document.querySelectorAll('button').forEach(b => b.classList.remove('option-active'));
             const d = questions[idx];
-            
-            // Relative path: static/images/...
             document.getElementById('q-img').src = `static/images/q${idx + 1}.webp`;
             document.getElementById('q-text').innerText = d.q;
             
