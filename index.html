@@ -21,10 +21,8 @@
     <audio id="audio-q"></audio>
     <audio id="audio-exp"></audio>
 
-    <!-- Main Container matching image_dd115e.jpg -->
     <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
         
-        <!-- Left Sidebar: Controls -->
         <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-6">
             <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
             <div class="grid grid-cols-2 gap-2">
@@ -36,7 +34,6 @@
             <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
         </div>
 
-        <!-- Right Side: Image and Question -->
         <div class="md:col-span-2 flex flex-col gap-4">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
@@ -73,7 +70,11 @@
             const list = document.getElementById('options');
             list.innerHTML = '';
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700" onclick="toggle(${i+1})" id="row-${i+1}">${i+1}: ${opt}</div>`;
+                // Added the dots between the option text and the number
+                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between" onclick="toggle(${i+1})" id="row-${i+1}">
+                    <span>${opt}</span>
+                    <span class="text-slate-500">.................................................. ${i+1}</span>
+                </div>`;
             });
         }
 
