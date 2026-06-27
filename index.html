@@ -12,7 +12,7 @@
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
     </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col text-slate-200">
+<body class="min-h-screen p-2 flex flex-col text-slate-200">
 
     <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
@@ -21,27 +21,30 @@
     <audio id="audio-q"></audio>
     <audio id="audio-exp"></audio>
 
-    <div class="max-w-5xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+    <!-- Changed order for mobile: Question first, then Controls -->
+    <div class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
         
-        <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-6">
-            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-            <div class="grid grid-cols-2 gap-2">
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
-                <button class="bg-slate-800 py-6 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
-            </div>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
-        </div>
-
-        <div class="md:col-span-2 flex flex-col gap-4">
+        <!-- Right side moves to top on mobile -->
+        <div class="flex flex-col gap-4 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
             </div>
-            <div class="glass p-6 rounded-xl border border-slate-700">
-                <p id="q-text" class="text-xl font-bold mb-4">يرجى الضغط على ابدأ...</p>
-                <div id="options" class="space-y-3"></div>
+            <div class="glass p-4 rounded-xl border border-slate-700">
+                <p id="q-text" class="text-lg font-bold mb-2">يرجى الضغط على ابدأ...</p>
+                <div id="options" class="space-y-2 text-sm"></div>
             </div>
+        </div>
+
+        <!-- Left side moves to bottom on mobile -->
+        <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
+            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+            <div class="grid grid-cols-2 gap-2">
+                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
+                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
+                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
+                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
+            </div>
+            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
         </div>
     </div>
 
@@ -70,10 +73,9 @@
             const list = document.getElementById('options');
             list.innerHTML = '';
             d.o.forEach((opt, i) => {
-                // Added the dots between the option text and the number
-                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between" onclick="toggle(${i+1})" id="row-${i+1}">
+                list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
                     <span>${opt}</span>
-                    <span class="text-slate-500">.................................................. ${i+1}</span>
+                    <span class="text-slate-500 overflow-hidden whitespace-nowrap">......... ${i+1}</span>
                 </div>`;
             });
         }
