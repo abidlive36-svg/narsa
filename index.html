@@ -6,95 +6,92 @@
     <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
+        body { background: #0b1120; color: #e2e8f0; font-family: sans-serif; }
+        .glass { background: #1e293b; border: 1px solid #334155; }
+        .btn-active { background: #059669 !important; border-color: #10b981 !important; }
+        .correct { background: #059669 !important; }
+        .wrong { background: #dc2626 !important; }
     </style>
 </head>
-<body class="min-h-screen p-2 flex flex-col text-slate-200">
+<body class="p-4">
 
-    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
-        <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
-    </div>
-
-    <audio id="audio-q"></audio>
-    <audio id="audio-exp"></audio>
-
-    <!-- Changed order for mobile: Question first, then Controls -->
-    <div class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <!-- Right side moves to top on mobile -->
-        <div class="flex flex-col gap-4 order-1 md:col-span-2">
-            <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
-                <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
+        <div class="glass p-4 rounded-xl flex flex-col gap-4 order-2 md:order-1 h-fit">
+            <input type="range" class="w-full">
+            <div id="btn-grid" class="grid grid-cols-2 gap-2">
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-1" onclick="toggle(1)">1</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-2" onclick="toggle(2)">2</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-3" onclick="toggle(3)">3</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-4" onclick="toggle(4)">4</button>
             </div>
-            <div class="glass p-4 rounded-xl border border-slate-700">
-                <p id="q-text" class="text-lg font-bold mb-2">يرجى الضغط على ابدأ...</p>
-                <div id="options" class="space-y-2 text-sm"></div>
-            </div>
+            <button onclick="checkAnswer()" class="bg-emerald-600 p-4 rounded-lg font-bold">Valider</button>
         </div>
 
-        <!-- Left side moves to bottom on mobile -->
-        <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
-            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-            <div class="grid grid-cols-2 gap-2">
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
+        <div class="md:col-span-2 flex flex-col gap-4 order-1 md:order-2">
+            <div class="bg-black rounded-xl overflow-hidden border border-slate-700">
+                <img id="q-img" src="" class="w-full h-auto">
             </div>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
+            <div class="glass p-6 rounded-xl">
+                <p id="q-text" class="text-xl font-bold mb-4"></p>
+                <div id="options" class="space-y-2"></div>
+            </div>
         </div>
     </div>
 
     <script>
         const questions = [
-            { q: "وضع صفائح تسجيل مزورة...", o: ["الخيار 1", "الخيار 2", "الخيار 3", "الخيار 4"], c: [1, 2, 4], audioQ: "q1_q.mp3", audioE: "q1_exp.mp3" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
+            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
+            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "بشيك بنكي باسم صاحب المخالفة", "بشيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg" },
+            { q: "على الطريق السيار فرق السرعة مع هاذ الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [2], img: "Screenshot (86).jpg" },
+            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "Screenshot (87).jpg" },
+            { q: "هاد العلامة كتعلن على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "Screenshot (88).jpg" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "Screenshot (89).jpg" },
+            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة ف:", o: ["1", "2"], c: [2], img: "Screenshot (90).jpg" },
+            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان جميع النقط مايمكنش ليا نجتاز الامتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 شهر"], c: [4], img: "Screenshot (91).jpg" },
+            { q: "فالمملكة المغربية، عدد القتلى ديال الراجلين كيمثل:", o: ["10% من قتلى حوادث السير", "20% من قتلى حوادث السير", "أكثر من 25% من قتل حوادث السير"], c: [3], img: "Screenshot (92).jpg" }
         ];
 
         let idx = 0, selected = [];
 
-        function startQuiz() {
-            document.getElementById('start-screen').style.display = 'none';
-            loadQ();
-        }
-
         function loadQ() {
             selected = [];
             const d = questions[idx];
-            document.getElementById('q-img').src = `static/images/q${idx + 1}.webp`;
+            document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = d.q;
-            
-            const qAudio = document.getElementById('audio-q');
-            qAudio.src = `static/sounds/${d.audioQ}`;
-            qAudio.play();
-
             const list = document.getElementById('options');
             list.innerHTML = '';
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
-                    <span>${opt}</span>
-                    <span class="text-slate-500 overflow-hidden whitespace-nowrap">......... ${i+1}</span>
-                </div>`;
+                list.innerHTML += `<div class="p-3 bg-slate-800 rounded-lg cursor-pointer" onclick="toggle(${i+1})" id="row-${i+1}">${opt} ............ ${i+1}</div>`;
             });
+            // Reset buttons
+            for(let i=1; i<=4; i++) document.getElementById(`btn-${i}`).className = "bg-slate-800 p-4 rounded-lg";
         }
 
         function toggle(id) {
             const btn = document.getElementById(`btn-${id}`);
             const row = document.getElementById(`row-${id}`);
-            const i = selected.indexOf(id);
-            if (i > -1) { selected.splice(i, 1); btn.classList.remove('option-active'); row.classList.remove('option-active'); }
-            else { selected.push(id); btn.classList.add('option-active'); row.classList.add('option-active'); }
+            if(selected.includes(id)) {
+                selected = selected.filter(x => x !== id);
+                btn.className = "bg-slate-800 p-4 rounded-lg";
+                row.className = "p-3 bg-slate-800 rounded-lg cursor-pointer";
+            } else {
+                selected.push(id);
+                btn.className = "bg-blue-600 p-4 rounded-lg";
+                row.className = "p-3 bg-blue-600 rounded-lg cursor-pointer";
+            }
         }
 
-        function nextQ() {
-            if (selected.length === 0) return;
-            const exp = document.getElementById('audio-exp');
-            exp.src = `static/sounds/${questions[idx].audioE}`;
-            exp.play();
-            setTimeout(() => { if(idx < questions.length - 1) { idx++; loadQ(); } }, 3000);
+        function checkAnswer() {
+            questions[idx].c.forEach(id => document.getElementById(`btn-${id}`).classList.add('correct'));
+            selected.forEach(id => {
+                if(!questions[idx].c.includes(id)) document.getElementById(`btn-${id}`).classList.add('wrong');
+            });
+            setTimeout(() => { if(idx < questions.length -1) { idx++; loadQ(); } }, 2000);
         }
+
+        window.onload = loadQ;
     </script>
 </body>
 </html>
