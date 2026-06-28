@@ -32,10 +32,9 @@
                 state.timeLeft--;
                 if (state.timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    // Automatically submit even if empty (resulting in 0 points)
                     state.isSubmitted = true;
                     render();
-                    setTimeout(next, 2000); // Move to next after 2s
+                    setTimeout(next, 2000);
                 }
                 render();
             }, 1000);
@@ -45,17 +44,14 @@
             const app = document.getElementById('app');
             
             if (state.view === 'result') {
-                const score = state.userAnswers.filter((ans, i) => 
-                    JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())
-                ).length;
-                
+                const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
                 app.innerHTML = `
                     <div class="col-span-4 glass p-10 rounded-xl text-center">
                         <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
                         <div class="grid grid-cols-5 gap-4 mb-8">
                             ${questions.map((_, i) => {
                                 const isCorrect = JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort());
-                                return `<div class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</div>`;
+                                return `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`;
                             }).join('')}
                         </div>
                         <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
@@ -66,10 +62,12 @@
             const q = questions[state.idx];
             app.innerHTML = `
                 <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
-                    <div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>
+                    ${state.view === 'quiz' ? `<div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>` : ''}
                     <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
-                    <button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>
-                    <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
+                    ${state.view === 'quiz' ? `<button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>` : ''}
+                    <button onclick="${state.view === 'review' ? 'state.view = \'result\'; render();' : 'next()'}" class="w-full bg-blue-600 py-3 rounded font-bold">
+                        ${state.view === 'review' ? 'العودة للنتائج' : 'السؤال التالي'}
+                    </button>
                 </div>
                 <div class="col-span-3 flex flex-col gap-6">
                     <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
@@ -80,32 +78,26 @@
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
+                                return `<div class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</div>`;
                             }).join('')}
                         </div>
                     </div>
                 </div>`;
         }
 
-        function toggle(id) { if(!state.isSubmitted) { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
-        
-        function submit() { 
-            state.isSubmitted = true; 
-            clearInterval(timerInterval); 
-            render(); 
+        function reviewQ(i) {
+            state.idx = i;
+            state.view = 'review';
+            state.isSubmitted = true;
+            render();
         }
 
+        function toggle(id) { if(!state.isSubmitted && state.view === 'quiz') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
+        function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
         function next() { 
             clearInterval(timerInterval);
-            if (state.idx < questions.length - 1) { 
-                state.idx++; 
-                state.isSubmitted = false; 
-                startTimer(); 
-                render(); 
-            } else { 
-                state.view = 'result'; 
-                render(); 
-            } 
+            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
+            else { state.view = 'result'; render(); } 
         }
 
         startTimer();
