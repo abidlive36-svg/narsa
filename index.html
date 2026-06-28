@@ -10,6 +10,8 @@
         body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
+        .correct { background: #059669 !important; border-color: #10b981 !important; }
+        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
     </style>
 </head>
 <body class="min-h-screen p-2 flex flex-col text-slate-200">
@@ -18,42 +20,40 @@
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
     </div>
 
-    <audio id="audio-q"></audio>
-    <audio id="audio-exp"></audio>
-
-    <!-- Changed order for mobile: Question first, then Controls -->
     <div class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
         
-        <!-- Right side moves to top on mobile -->
         <div class="flex flex-col gap-4 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
-                <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
+                <img id="q-img" src="" class="w-full h-full object-contain" alt="Question Image">
             </div>
             <div class="glass p-4 rounded-xl border border-slate-700">
-                <p id="q-text" class="text-lg font-bold mb-2">يرجى الضغط على ابدأ...</p>
+                <p id="q-text" class="text-lg font-bold mb-2"></p>
                 <div id="options" class="space-y-2 text-sm"></div>
             </div>
         </div>
 
-        <!-- Left side moves to bottom on mobile -->
         <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
-            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-            <div class="grid grid-cols-2 gap-2">
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
-            </div>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
+            <div id="btn-grid" class="grid grid-cols-2 gap-2"></div>
+            <button onclick="checkAnswer()" class="bg-blue-600 py-4 rounded-xl font-bold text-lg">التصحيح</button>
+            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">السؤال التالي</button>
         </div>
     </div>
 
     <script>
         const questions = [
-            { q: "وضع صفائح تسجيل مزورة...", o: ["الخيار 1", "الخيار 2", "الخيار 3", "الخيار 4"], c: [1, 2, 4], audioQ: "q1_q.mp3", audioE: "q1_exp.mp3" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
+            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
+            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "بشيك بنكي باسم صاحب المخالفة", "بشيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg" },
+            { q: "على الطريق السيار فرق السرعة مع هاذ الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [2], img: "Screenshot (86).jpg" },
+            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "Screenshot (87).jpg" },
+            { q: "هاد العلامة كتعلن على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "Screenshot (88).jpg" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "Screenshot (89).jpg" },
+            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة ف:", o: ["1", "2"], c: [2], img: "Screenshot (90).jpg" },
+            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان جميع النقط مايمكنش ليا نجتاز الامتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 شهر"], c: [4], img: "Screenshot (91).jpg" },
+            { q: "فالمملكة المغربية، عدد القتلى ديال الراجلين كيمثل:", o: ["10% من قتلى حوادث السير", "20% من قتلى حوادث السير", "أكثر من 25% من قتل حوادث السير"], c: [3], img: "Screenshot (92).jpg" }
         ];
 
-        let idx = 0, selected = [];
+        let idx = 0, selected = [], answered = false;
 
         function startQuiz() {
             document.getElementById('start-screen').style.display = 'none';
@@ -61,26 +61,26 @@
         }
 
         function loadQ() {
-            selected = [];
+            selected = []; answered = false;
             const d = questions[idx];
-            document.getElementById('q-img').src = `static/images/q${idx + 1}.webp`;
+            document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = d.q;
             
-            const qAudio = document.getElementById('audio-q');
-            qAudio.src = `static/sounds/${d.audioQ}`;
-            qAudio.play();
-
             const list = document.getElementById('options');
+            const btns = document.getElementById('btn-grid');
             list.innerHTML = '';
+            btns.innerHTML = '';
+            
             d.o.forEach((opt, i) => {
                 list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
-                    <span>${opt}</span>
-                    <span class="text-slate-500 overflow-hidden whitespace-nowrap">......... ${i+1}</span>
+                    <span>${opt}</span> <span class="text-slate-500">......... ${i+1}</span>
                 </div>`;
+                btns.innerHTML += `<button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
             });
         }
 
         function toggle(id) {
+            if (answered) return;
             const btn = document.getElementById(`btn-${id}`);
             const row = document.getElementById(`row-${id}`);
             const i = selected.indexOf(id);
@@ -88,12 +88,24 @@
             else { selected.push(id); btn.classList.add('option-active'); row.classList.add('option-active'); }
         }
 
+        function checkAnswer() {
+            if (answered) return;
+            answered = true;
+            questions[idx].c.forEach(id => {
+                document.getElementById(`row-${id}`).classList.add('correct');
+                document.getElementById(`btn-${id}`).classList.add('correct');
+            });
+            selected.forEach(id => {
+                if(!questions[idx].c.includes(id)) {
+                    document.getElementById(`row-${id}`).classList.add('wrong');
+                    document.getElementById(`btn-${id}`).classList.add('wrong');
+                }
+            });
+        }
+
         function nextQ() {
-            if (selected.length === 0) return;
-            const exp = document.getElementById('audio-exp');
-            exp.src = `static/sounds/${questions[idx].audioE}`;
-            exp.play();
-            setTimeout(() => { if(idx < questions.length - 1) { idx++; loadQ(); } }, 3000);
+            if (idx < questions.length - 1) { idx++; loadQ(); }
+            else { alert("انتهى الاختبار!"); }
         }
     </script>
 </body>
