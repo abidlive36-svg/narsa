@@ -2,107 +2,81 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; color: white; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); }
-        .correct { background: #059669 !important; border-color: #10b981 !important; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
-        .selected { border: 2px solid #3b82f6 !important; }
+        body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
+        .bg-custom { background: #111827; }
+        .glass { background: #1e293b; border: 1px solid #334155; }
+        .selected { border: 2px solid #10b981 !important; }
+        .correct { background: #065f46 !important; border-color: #059669 !important; }
+        .wrong { background: #991b1b !important; border-color: #dc2626 !important; }
     </style>
 </head>
-<body class="p-6">
+<body class="p-4">
 
-    <div id="app" class="max-w-4xl mx-auto"></div>
+    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- Content will be injected here -->
+    </div>
 
     <script>
-        // Ensure your image paths match your folder structure
         const questions = [
-            { q: "رخصة السياقة مزورة، هل يمكن حجز العربة؟", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
-            { q: "وضعية المقعد تؤثر على التعب؟", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" }
+            { q: "وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كايتخبر جنحة كيتعاقب عليها:", o: ["بعقوبة حبسية", "بإيداع المركبة بالحجز", "بإتلاف المركبة", "بمصادرة المركبة لفائدة الدولة"], c: [1, 2, 4], img: "q1.webp" }
         ];
 
-        let state = {
-            view: 'quiz',
-            idx: 0,
-            userAnswers: new Array(questions.length).fill(null).map(() => []),
-            isSubmitted: false
-        };
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz' };
 
         function render() {
             const app = document.getElementById('app');
-            
             if (state.view === 'result') {
-                const score = state.userAnswers.filter((ans, i) => 
-                    JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())
-                ).length;
-
-                app.innerHTML = `
-                    <div class="glass p-10 rounded-3xl text-center">
-                        <h1 class="text-4xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
-                        <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
-                    </div>
-                `;
+                app.innerHTML = `<div class="col-span-4 text-center p-10 glass rounded-xl"><h1 class="text-3xl mb-4">انتهى الاختبار</h1><button onclick="location.reload()" class="bg-blue-600 px-6 py-2 rounded">إعادة</button></div>`;
                 return;
             }
 
             const q = questions[state.idx];
-            // Added image container back here
             app.innerHTML = `
-                <div class="glass p-6 rounded-2xl">
-                    <div class="mb-6 rounded-xl overflow-hidden border border-slate-600">
-                        <img src="static/images/${q.img}" class="w-full h-auto" alt="Question Image">
+                <!-- Left Sidebar -->
+                <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
+                    <div class="space-y-2">
+                        <label>مستوى الصوت</label>
+                        <input type="range" class="w-full">
                     </div>
-                    <h2 class="text-2xl mb-6 font-bold">${state.idx + 1}. ${q.q}</h2>
-                    <div class="grid gap-4 mb-8">
-                        ${q.o.map((opt, i) => {
-                            const id = i + 1;
-                            const isSelected = state.userAnswers[state.idx].includes(id);
-                            let colorClass = '';
-                            if (state.isSubmitted) {
-                                if (q.c.includes(id)) colorClass = 'correct';
-                                else if (isSelected) colorClass = 'wrong';
-                            }
-                            return `<button onclick="toggle(${id})" class="p-4 rounded-xl border border-slate-600 transition ${isSelected ? 'selected' : ''} ${colorClass}">
-                                ${opt}
-                            </button>`;
-                        }).join('')}
+                    <div class="grid grid-cols-2 gap-2">
+                        ${[2, 1, 4, 3].map(n => `<button class="p-4 bg-slate-800 rounded border border-slate-600">${n}</button>`).join('')}
                     </div>
-                    <div class="flex gap-4">
-                        <button onclick="submit()" class="bg-blue-600 px-6 py-3 rounded-xl font-bold">تصحيح</button>
-                        <button onclick="next()" class="bg-emerald-600 px-6 py-3 rounded-xl font-bold">التالي</button>
+                    <button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>
+                </div>
+
+                <!-- Right Main Content -->
+                <div class="col-span-3 flex flex-col gap-6">
+                    <div class="glass p-2 rounded-xl">
+                        <img src="static/images/${q.img}" class="w-full rounded-lg">
+                    </div>
+                    <div class="glass p-6 rounded-xl">
+                        <h2 class="text-xl mb-6">${q.q}</h2>
+                        <div class="space-y-3">
+                            ${q.o.map((opt, i) => {
+                                const id = i + 1;
+                                const isSel = state.userAnswers[state.idx].includes(id);
+                                let cls = '';
+                                if(state.isSubmitted) cls = q.c.includes(id) ? 'correct' : (isSel ? 'wrong' : '');
+                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
+                            }).join('')}
+                        </div>
                     </div>
                 </div>
             `;
         }
 
         function toggle(id) {
-            if (state.isSubmitted) return;
+            if(state.isSubmitted) return;
             const arr = state.userAnswers[state.idx];
             const i = arr.indexOf(id);
-            if (i > -1) arr.splice(i, 1); else arr.push(id);
+            if(i > -1) arr.splice(i, 1); else arr.push(id);
             render();
         }
 
-        function submit() {
-            if (state.userAnswers[state.idx].length === 0) return;
-            state.isSubmitted = true;
-            render();
-        }
-
-        function next() {
-            if (state.idx < questions.length - 1) {
-                state.idx++;
-                state.isSubmitted = false;
-                render();
-            } else {
-                state.view = 'result';
-                render();
-            }
-        }
-
+        function submit() { state.isSubmitted = true; render(); }
         render();
     </script>
 </body>
