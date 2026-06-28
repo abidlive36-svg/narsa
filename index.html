@@ -30,7 +30,7 @@
     <!-- Main Quiz Layout -->
     <div id="quiz-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-6 mt-4">
         
-        <!-- Left: Media/Text -->
+        <!-- Left: Image and Question -->
         <div class="flex flex-col gap-6 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-contain" alt="Question Image">
@@ -41,7 +41,7 @@
             </div>
         </div>
 
-        <!-- Right: Menu -->
+        <!-- Right: Menu/Controls -->
         <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-4 order-2 h-fit">
             <h3 class="text-center font-bold">لوحة التحكم</h3>
             <div class="grid grid-cols-2 gap-3" id="btn-grid"></div>
@@ -58,12 +58,11 @@
         const questions = [
             { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp", audioQ: "q1_q.mp3", audioE: "q1_exp.mp3" },
             { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg", audioQ: "q84_q.mp3", audioE: "q84_exp.mp3" }
-            // Add remaining questions...
+            // Add other questions here...
         ];
 
         let idx = 0, selected = [], answered = false;
         let results = new Array(questions.length).fill(null);
-        let userAnswers = new Array(questions.length).fill([]);
 
         function startQuiz() {
             document.getElementById('start-screen').style.display = 'none';
@@ -71,42 +70,53 @@
         }
 
         function loadQ() {
-            selected = userAnswers[idx] || [];
-            answered = (results[idx] !== null);
+            // Strictly reset state for the new question
+            selected = []; 
+            answered = false;
             
             const d = questions[idx];
             document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = `${idx + 1}. ${d.q}`;
             
+            // Play Audio
+            const qAudio = document.getElementById('audio-q');
+            qAudio.src = `static/sounds/${d.audioQ}`;
+            qAudio.play();
+            
             const list = document.getElementById('options');
             const btns = document.getElementById('btn-grid');
-            list.innerHTML = ''; btns.innerHTML = '';
+            list.innerHTML = ''; 
+            btns.innerHTML = '';
             
             d.o.forEach((opt, i) => {
-                let active = selected.includes(i+1) ? 'option-active' : '';
-                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 ${active}" onclick="toggle(${i+1})" id="row-${i+1}">${opt}</div>`;
-                btns.innerHTML += `<button class="bg-slate-800 py-2 rounded-xl font-bold border border-slate-700 ${active}" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
+                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700" onclick="toggle(${i+1})" id="row-${i+1}">${opt}</div>`;
+                btns.innerHTML += `<button class="bg-slate-800 py-2 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
             });
-
-            if (answered) applyStyles();
         }
 
         function toggle(id) {
             if (answered) return;
+            const btn = document.getElementById(`btn-${id}`);
+            const row = document.getElementById(`row-${id}`);
             const i = selected.indexOf(id);
-            if (i > -1) { selected.splice(i, 1); } else { selected.push(id); }
-            userAnswers[idx] = [...selected];
-            loadQ(); // Re-render to show updated selection
+            
+            if (i > -1) { 
+                selected.splice(i, 1); 
+                btn.classList.remove('option-active'); 
+                row.classList.remove('option-active'); 
+            } else { 
+                selected.push(id); 
+                btn.classList.add('option-active'); 
+                row.classList.add('option-active'); 
+            }
         }
 
         function checkAnswer() {
             if (answered || selected.length === 0) return;
             answered = true;
             results[idx] = JSON.stringify(selected.sort()) === JSON.stringify(questions[idx].c.sort());
-            applyStyles();
-        }
-
-        function applyStyles() {
+            
+            // Show colors
             questions[idx].c.forEach(id => {
                 document.getElementById(`row-${id}`)?.classList.add('correct');
                 document.getElementById(`btn-${id}`)?.classList.add('correct');
@@ -120,8 +130,12 @@
         }
 
         function nextQ() {
-            if (idx < questions.length - 1) { idx++; loadQ(); } 
-            else { showResults(); }
+            if (idx < questions.length - 1) { 
+                idx++; 
+                loadQ(); 
+            } else { 
+                showResults(); 
+            }
         }
 
         function showResults() {
@@ -140,6 +154,10 @@
             document.getElementById('quiz-container').classList.remove('hidden');
             document.getElementById('review-screen').classList.add('hidden');
             loadQ();
+            // Force re-evaluation so the answers appear already marked
+            answered = false; 
+            checkAnswer(); 
+            answered = true;
         }
     </script>
 </body>
