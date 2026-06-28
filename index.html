@@ -14,8 +14,7 @@
 </head>
 <body class="p-6">
 
-    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6">
-        </div>
+    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6"></div>
 
     <script>
         const questions = [
@@ -23,37 +22,32 @@
             { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
         ];
 
-        let state = { 
-            idx: 0, 
-            userAnswers: new Array(questions.length).fill(null).map(() => []), 
-            isSubmitted: false, 
-            view: 'quiz' 
-        };
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz' };
 
         function render() {
             const app = document.getElementById('app');
             
-            // Result View
             if (state.view === 'result') {
-                const score = state.userAnswers.filter((ans, i) => 
-                    JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())
-                ).length;
+                const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
+                
                 app.innerHTML = `
-                    <div class="col-span-4 glass p-20 rounded-xl text-center">
-                        <h1 class="text-4xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
+                    <div class="col-span-4 glass p-10 rounded-xl text-center">
+                        <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
+                        <div class="grid grid-cols-5 gap-4 mb-8">
+                            ${questions.map((_, i) => {
+                                const isCorrect = JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort());
+                                return `<div class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</div>`;
+                            }).join('')}
+                        </div>
                         <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
                     </div>`;
                 return;
             }
 
-            // Quiz View
             const q = questions[state.idx];
             app.innerHTML = `
                 <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
                     <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
-                    <div class="grid grid-cols-2 gap-2">
-                        ${[1, 2, 3, 4].map(n => `<div class="p-4 bg-slate-900 rounded border border-slate-700 text-center">${n}</div>`).join('')}
-                    </div>
                     <button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>
                     <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
                 </div>
@@ -73,31 +67,9 @@
                 </div>`;
         }
 
-        function toggle(id) {
-            if(state.isSubmitted) return;
-            const arr = state.userAnswers[state.idx];
-            const i = arr.indexOf(id);
-            if(i > -1) arr.splice(i, 1); else arr.push(id);
-            render();
-        }
-
-        function submit() { 
-            if(state.userAnswers[state.idx].length > 0) {
-                state.isSubmitted = true; 
-                render(); 
-            }
-        }
-
-        function next() {
-            if (state.idx < questions.length - 1) {
-                state.idx++;
-                state.isSubmitted = false;
-                render();
-            } else {
-                state.view = 'result';
-                render();
-            }
-        }
+        function toggle(id) { if(!state.isSubmitted) { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
+        function submit() { if(state.userAnswers[state.idx].length > 0) { state.isSubmitted = true; render(); } }
+        function next() { if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; render(); } else { state.view = 'result'; render(); } }
 
         render();
     </script>
