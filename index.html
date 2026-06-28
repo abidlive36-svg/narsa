@@ -50,8 +50,14 @@
         const questions = [
             { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg", audioQ: "q83_q.mp3", audioE: "q83_exp.mp3" },
             { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg", audioQ: "q84_q.mp3", audioE: "q84_exp.mp3" },
-            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "بشيك بنكي باسم صاحب المخالفة", "بشيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg", audioQ: "q85_q.mp3", audioE: "q85_exp.mp3" }
-            // Add the remaining questions following this exact format...
+            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "بشيك بنكي باسم صاحب المخالفة", "بشيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg", audioQ: "q85_q.mp3", audioE: "q85_exp.mp3" },
+            { q: "على الطريق السيار فرق السرعة مع هاذ الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [2], img: "Screenshot (86).jpg", audioQ: "q86_q.mp3", audioE: "q86_exp.mp3" },
+            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "Screenshot (87).jpg", audioQ: "q87_q.mp3", audioE: "q87_exp.mp3" },
+            { q: "هاد العلامة كتعلن على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "Screenshot (88).jpg", audioQ: "q88_q.mp3", audioE: "q88_exp.mp3" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "Screenshot (89).jpg", audioQ: "q89_q.mp3", audioE: "q89_exp.mp3" },
+            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة ف:", o: ["1", "2"], c: [2], img: "Screenshot (90).jpg", audioQ: "q90_q.mp3", audioE: "q90_exp.mp3" },
+            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان جميع النقط مايمكنش ليا نجتاز الامتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 شهر"], c: [4], img: "Screenshot (91).jpg", audioQ: "q91_q.mp3", audioE: "q91_exp.mp3" },
+            { q: "فالمملكة المغربية، عدد القتلى ديال الراجلين كيمثل:", o: ["10% من قتلى حوادث السير", "20% من قتلى حوادث السير", "أكثر من 25% من قتل حوادث السير"], c: [3], img: "Screenshot (92).jpg", audioQ: "q92_q.mp3", audioE: "q92_exp.mp3" }
         ];
 
         let idx = 0, selected = [], answered = false;
@@ -67,7 +73,6 @@
             document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = d.q;
             
-            // Audio loading logic from your working script
             const qAudio = document.getElementById('audio-q');
             qAudio.src = `static/sounds/${d.audioQ}`;
             qAudio.play();
@@ -112,7 +117,7 @@
                 exp.src = `static/sounds/${questions[idx-1].audioE}`;
                 exp.play();
                 setTimeout(() => loadQ(), 2000); 
-            }
+            } else { alert("انتهى الاختبار!"); }
         }
     </script>
 </body>
