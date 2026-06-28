@@ -2,93 +2,54 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>NARSA Quiz</title>
+    <title>Modern NARSA UI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0b1120; color: #e2e8f0; font-family: sans-serif; }
-        .glass { background: #1e293b; border: 1px solid #334155; }
-        .selected { border: 2px solid #3b82f6 !important; background: #1e3a8a !important; }
-        .correct { background: #065f46 !important; border-color: #059669 !important; color: white !important; }
-        .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white !important; }
-        /* NARSA-style right sidebar */
-        .narsa-btn { background: #3b82f6; color: white; padding: 12px; border-radius: 4px; text-align: center; font-weight: bold; margin-bottom: 8px; border: 2px solid #2563eb; }
+        body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
+        .bg-panel { background: #131b2e; border: 1px solid #1e293b; }
+        .btn-option { border-bottom: 1px dashed #475569; }
+        .selected { background: #1e3a8a; border-color: #3b82f6; }
+        .correct { background: #065f46; }
+        .wrong { background: #991b1b; }
     </style>
 </head>
 <body class="p-6">
 
-    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6"></div>
-
-    <script>
-        const questions = [
-            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" },
-            { q: "إلا نسبة الكحول في الهواء المنبعث من الفم تجاوزات 0,10 كيتعرض السائق لخصم:", o: ["4 النقط", "6 النقط", "8 النقط"], c: [3], img: "q3.webp" }
-        ];
-
-        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
-        let timerInterval;
-
-        function startTimer() {
-            clearInterval(timerInterval);
-            state.timeLeft = 15;
-            timerInterval = setInterval(() => {
-                state.timeLeft--;
-                if (state.timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    state.isSubmitted = true;
-                    render();
-                    setTimeout(next, 2000);
-                }
-                render();
-            }, 1000);
-        }
-
-        function render() {
-            const app = document.getElementById('app');
-            if (state.view === 'result') {
-                const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
-                app.innerHTML = `<div class="col-span-4 glass p-10 rounded-xl text-center">
-                    <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
-                    <div class="grid grid-cols-5 gap-4 mb-8">${questions.map((_, i) => `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort()) ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`).join('')}</div>
-                    <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
-                </div>`;
-                return;
-            }
-
-            const q = questions[state.idx];
-            app.innerHTML = `
-                <div class="col-span-3 flex flex-col gap-4">
-                    <div class="glass p-2 rounded"><img src="static/images/${q.img}" class="w-full rounded"></div>
-                    <div class="glass p-6 rounded">
-                        <h2 class="text-xl mb-4 font-bold">${q.q}</h2>
-                        <div class="space-y-2">
-                            ${q.o.map((opt, i) => {
-                                const id = i + 1;
-                                const isSel = state.userAnswers[state.idx].includes(id);
-                                let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<button onclick="toggle(${id})" class="w-full text-right p-3 rounded border border-slate-600 ${isSel?'selected':''} ${cls}"><span class="font-bold ml-2">${id}.</span> ${opt}</button>`;
-                            }).join('')}
-                        </div>
-                    </div>
+    <div id="app" class="max-w-6xl mx-auto p-4 bg-panel rounded-lg">
+        <div class="text-white text-left mb-4 font-bold">السؤال 1/1</div>
+        
+        <div class="grid grid-cols-4 gap-6">
+            <!-- Left Controls -->
+            <div class="col-span-1 space-y-4">
+                <div class="p-4 bg-[#1e293b] rounded">
+                    <div class="text-xs mb-2">مستوى الصوت</div>
+                    <div class="h-2 bg-blue-600 rounded"></div>
                 </div>
-                <!-- NARSA Right Sidebar -->
-                <div class="col-span-1 flex flex-col gap-2">
-                    <div class="glass p-4 rounded text-center mb-4">
-                        <div class="text-3xl font-bold ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">${state.timeLeft}</div>
-                    </div>
-                    ${[1, 2, 3, 4].map(n => `<div class="narsa-btn">${n}</div>`).join('')}
-                    <button onclick="submit()" class="bg-emerald-600 p-4 rounded font-bold mt-2">تصحيح</button>
-                    <button onclick="next()" class="bg-blue-600 p-4 rounded font-bold">التالي</button>
-                </div>`;
-        }
+                <div class="grid grid-cols-2 gap-2">
+                    <button class="bg-[#1e293b] p-6 rounded font-bold">2</button>
+                    <button class="bg-[#1e293b] p-6 rounded font-bold">1</button>
+                    <button class="bg-[#1e293b] p-6 rounded font-bold">4</button>
+                    <button class="bg-[#1e293b] p-6 rounded font-bold">3</button>
+                </div>
+                <button class="w-full bg-emerald-600 p-4 rounded font-bold text-white">Valider</button>
+            </div>
 
-        function reviewQ(i) { state.idx = i; state.view = 'review'; state.isSubmitted = true; render(); }
-        function toggle(id) { if(!state.isSubmitted || state.view === 'review') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
-        function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
-        function next() { clearInterval(timerInterval); if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } else { state.view = 'result'; render(); } }
+            <!-- Main Scenario Image Area -->
+            <div class="col-span-3 bg-black rounded h-[300px] flex items-center justify-center text-gray-500">
+                Scenario Image
+            </div>
+        </div>
 
-        startTimer();
-        render();
-    </script>
+        <!-- Options Section -->
+        <div class="mt-6 p-6 bg-[#1e293b] rounded text-white">
+            <h2 class="mb-6 font-bold text-lg">وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كاتبتار جنحة كيتعاقب عليها:</h2>
+            <div class="space-y-4">
+                <div class="flex justify-between btn-option pb-2"><span>بعقوبة حبسية</span><span>1</span></div>
+                <div class="flex justify-between btn-option pb-2"><span>بإيداع المركبة بالحجز</span><span>2</span></div>
+                <div class="flex justify-between btn-option pb-2"><span>باتلاف المركبة</span><span>3</span></div>
+                <div class="flex justify-between btn-option pb-2"><span>بمصادرة المركبة لفائدة الدولة</span><span>4</span></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
