@@ -6,39 +6,40 @@
     <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .option-active { background: #3b82f6 !important; border-color: #60a5fa !important; }
-        .correct { background: #059669 !important; border-color: #10b981 !important; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
+        body { background: #0b1120; color: #e2e8f0; font-family: sans-serif; }
+        .glass { background: #1e293b; border: 1px solid #334155; }
+        .btn-active { background: #059669 !important; border-color: #10b981 !important; }
+        .correct { background: #059669 !important; }
+        .wrong { background: #dc2626 !important; }
     </style>
 </head>
-<body class="min-h-screen p-4 text-slate-200">
+<body class="p-4">
 
-    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
         
-        <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-6 order-2 md:order-1">
-            <input type="range" class="w-full accent-blue-500">
+        <div class="glass p-4 rounded-xl flex flex-col gap-4 order-2 md:order-1 h-fit">
+            <input type="range" class="w-full">
             <div id="btn-grid" class="grid grid-cols-2 gap-2">
-                </div>
-            <button onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
-            <button onclick="nextQ()" class="bg-emerald-600 py-3 rounded-xl font-bold">السؤال التالي</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-1" onclick="toggle(1)">1</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-2" onclick="toggle(2)">2</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-3" onclick="toggle(3)">3</button>
+                <button class="bg-slate-800 p-4 rounded-lg" id="btn-4" onclick="toggle(4)">4</button>
+            </div>
+            <button onclick="checkAnswer()" class="bg-emerald-600 p-4 rounded-lg font-bold">Valider</button>
         </div>
 
         <div class="md:col-span-2 flex flex-col gap-4 order-1 md:order-2">
-            <div class="bg-black rounded-xl border border-slate-700 overflow-hidden">
-                <img id="q-img" src="" class="w-full h-auto object-contain" alt="Question Image">
+            <div class="bg-black rounded-xl overflow-hidden border border-slate-700">
+                <img id="q-img" src="" class="w-full h-auto">
             </div>
-            <div class="glass p-6 rounded-xl border border-slate-700">
+            <div class="glass p-6 rounded-xl">
                 <p id="q-text" class="text-xl font-bold mb-4"></p>
-                <div id="options" class="space-y-3"></div>
+                <div id="options" class="space-y-2"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // Updated questions logic
         const questions = [
             { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
             { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
@@ -52,60 +53,42 @@
             { q: "فالمملكة المغربية، عدد القتلى ديال الراجلين كيمثل:", o: ["10% من قتلى حوادث السير", "20% من قتلى حوادث السير", "أكثر من 25% من قتل حوادث السير"], c: [3], img: "Screenshot (92).jpg" }
         ];
 
-        let idx = 0, selected = [], answered = false;
+        let idx = 0, selected = [];
 
         function loadQ() {
-            selected = []; answered = false;
+            selected = [];
             const d = questions[idx];
             document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = d.q;
-            
             const list = document.getElementById('options');
-            const btns = document.getElementById('btn-grid');
             list.innerHTML = '';
-            btns.innerHTML = '';
-            
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-3 border border-slate-600 rounded-lg cursor-pointer hover:border-slate-400" onclick="toggle(${i+1})" id="row-${i+1}">
-                    ${opt} ......................................... ${i+1}
-                </div>`;
-                btns.innerHTML += `<button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
+                list.innerHTML += `<div class="p-3 bg-slate-800 rounded-lg cursor-pointer" onclick="toggle(${i+1})" id="row-${i+1}">${opt} ............ ${i+1}</div>`;
             });
+            // Reset buttons
+            for(let i=1; i<=4; i++) document.getElementById(`btn-${i}`).className = "bg-slate-800 p-4 rounded-lg";
         }
 
         function toggle(id) {
-            if (answered) return;
             const btn = document.getElementById(`btn-${id}`);
             const row = document.getElementById(`row-${id}`);
-            if (selected.includes(id)) {
+            if(selected.includes(id)) {
                 selected = selected.filter(x => x !== id);
-                btn.classList.remove('option-active');
-                row.classList.remove('option-active');
+                btn.className = "bg-slate-800 p-4 rounded-lg";
+                row.className = "p-3 bg-slate-800 rounded-lg cursor-pointer";
             } else {
                 selected.push(id);
-                btn.classList.add('option-active');
-                row.classList.add('option-active');
+                btn.className = "bg-blue-600 p-4 rounded-lg";
+                row.className = "p-3 bg-blue-600 rounded-lg cursor-pointer";
             }
         }
 
         function checkAnswer() {
-            if (answered) return;
-            answered = true;
-            const correct = questions[idx].c;
-            correct.forEach(id => {
-                document.getElementById(`row-${id}`).classList.add('correct');
-                document.getElementById(`btn-${id}`).classList.add('correct');
-            });
+            questions[idx].c.forEach(id => document.getElementById(`btn-${id}`).classList.add('correct'));
             selected.forEach(id => {
-                if(!correct.includes(id)) {
-                    document.getElementById(`row-${id}`).classList.add('wrong');
-                    document.getElementById(`btn-${id}`).classList.add('wrong');
-                }
+                if(!questions[idx].c.includes(id)) document.getElementById(`btn-${id}`).classList.add('wrong');
             });
-        }
-
-        function nextQ() {
-            if (idx < questions.length - 1) { idx++; loadQ(); }
+            setTimeout(() => { if(idx < questions.length -1) { idx++; loadQ(); } }, 2000);
         }
 
         window.onload = loadQ;
