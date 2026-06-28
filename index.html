@@ -8,8 +8,8 @@
         body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
         .glass { background: #1e293b; border: 1px solid #334155; }
         .selected { border: 2px solid #3b82f6 !important; }
-        .correct { background: #065f46 !important; border-color: #059669 !important; color: white; }
-        .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white; }
+        .correct { background: #065f46 !important; border-color: #059669 !important; color: white !important; }
+        .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white !important; }
     </style>
 </head>
 <body class="p-6">
@@ -19,8 +19,8 @@
 
     <script>
         const questions = [
-            { q: "وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كايتخبر جنحة كيتعاقب عليها:", o: ["بعقوبة حبسية", "بإيداع المركبة بالحجز", "بإتلاف المركبة", "بمصادرة المركبة لفائدة الدولة"], c: [1, 2, 4], img: "q1.webp" },
-            { q: "السؤال الثاني...", o: ["الخيار 1", "الخيار 2", "الخيار 3", "الخيار 4"], c: [3], img: "q2.jpg" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
         ];
 
         let state = { 
@@ -33,6 +33,7 @@
         function render() {
             const app = document.getElementById('app');
             
+            // Result View
             if (state.view === 'result') {
                 const score = state.userAnswers.filter((ans, i) => 
                     JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())
@@ -45,6 +46,7 @@
                 return;
             }
 
+            // Quiz View
             const q = questions[state.idx];
             app.innerHTML = `
                 <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
@@ -79,7 +81,12 @@
             render();
         }
 
-        function submit() { state.isSubmitted = true; render(); }
+        function submit() { 
+            if(state.userAnswers[state.idx].length > 0) {
+                state.isSubmitted = true; 
+                render(); 
+            }
+        }
 
         function next() {
             if (state.idx < questions.length - 1) {
