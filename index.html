@@ -22,14 +22,27 @@
             { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
         ];
 
-        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz' };
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
+        let timerInterval;
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            state.timeLeft = 15;
+            timerInterval = setInterval(() => {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!state.isSubmitted) submit();
+                }
+                render();
+            }, 1000);
+        }
 
         function render() {
             const app = document.getElementById('app');
             
             if (state.view === 'result') {
                 const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
-                
                 app.innerHTML = `
                     <div class="col-span-4 glass p-10 rounded-xl text-center">
                         <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
@@ -47,6 +60,7 @@
             const q = questions[state.idx];
             app.innerHTML = `
                 <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
+                    <div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft} ثانية</div>
                     <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
                     <button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>
                     <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
@@ -68,9 +82,10 @@
         }
 
         function toggle(id) { if(!state.isSubmitted) { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
-        function submit() { if(state.userAnswers[state.idx].length > 0) { state.isSubmitted = true; render(); } }
-        function next() { if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; render(); } else { state.view = 'result'; render(); } }
+        function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
+        function next() { if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } else { state.view = 'result'; clearInterval(timerInterval); render(); } }
 
+        startTimer();
         render();
     </script>
 </body>
