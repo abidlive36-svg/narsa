@@ -78,7 +78,7 @@
                                 const isSel = state.userAnswers[state.idx].includes(id);
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
                                 return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">
-                                            <span class="ml-3 font-bold">${id}.</span> ${opt}
+                                            <span class="font-bold ml-2 inline-block w-6">${id}.</span> ${opt}
                                         </button>`;
                             }).join('')}
                         </div>
