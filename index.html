@@ -76,24 +76,18 @@
                             ${q.o.map((opt, i) => {
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
-                                // Always show colors in review mode to see feedback
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
+                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">
+                                            <span class="ml-3 font-bold">${id}.</span> ${opt}
+                                        </button>`;
                             }).join('')}
                         </div>
                     </div>
                 </div>`;
         }
 
-        function reviewQ(i) {
-            state.idx = i;
-            state.view = 'review';
-            state.isSubmitted = true;
-            render();
-        }
-
+        function reviewQ(i) { state.idx = i; state.view = 'review'; state.isSubmitted = true; render(); }
         function toggle(id) { 
-            // Now allows toggling during both quiz and review modes
             if(!state.isSubmitted || state.view === 'review') { 
                 const arr = state.userAnswers[state.idx]; 
                 const i = arr.indexOf(id); 
@@ -101,20 +95,11 @@
                 render(); 
             } 
         }
-
         function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
-        
         function next() { 
             clearInterval(timerInterval);
-            if (state.idx < questions.length - 1) { 
-                state.idx++; 
-                state.isSubmitted = false; 
-                startTimer(); 
-                render(); 
-            } else { 
-                state.view = 'result'; 
-                render(); 
-            } 
+            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
+            else { state.view = 'result'; render(); } 
         }
 
         startTimer();
