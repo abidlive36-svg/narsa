@@ -15,18 +15,17 @@
 </head>
 <body class="p-6">
 
-    <div id="app" class="max-w-4xl mx-auto">
-        <!-- The content will be injected here -->
-    </div>
+    <div id="app" class="max-w-4xl mx-auto"></div>
 
     <script>
+        // Ensure your image paths match your folder structure
         const questions = [
-            { q: "رخصة السياقة مزورة؟", o: ["نعم", "لا"], c: [1] },
-            { q: "وضعية المقعد تؤثر على التعب؟", o: ["نعم", "لا"], c: [1] }
+            { q: "رخصة السياقة مزورة، هل يمكن حجز العربة؟", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
+            { q: "وضعية المقعد تؤثر على التعب؟", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" }
         ];
 
         let state = {
-            view: 'quiz', // 'quiz' or 'result'
+            view: 'quiz',
             idx: 0,
             userAnswers: new Array(questions.length).fill(null).map(() => []),
             isSubmitted: false
@@ -49,30 +48,31 @@
                 return;
             }
 
-            // Quiz View
             const q = questions[state.idx];
+            // Added image container back here
             app.innerHTML = `
                 <div class="glass p-6 rounded-2xl">
-                    <h2 class="text-2xl mb-6">${state.idx + 1}. ${q.q}</h2>
+                    <div class="mb-6 rounded-xl overflow-hidden border border-slate-600">
+                        <img src="static/images/${q.img}" class="w-full h-auto" alt="Question Image">
+                    </div>
+                    <h2 class="text-2xl mb-6 font-bold">${state.idx + 1}. ${q.q}</h2>
                     <div class="grid gap-4 mb-8">
                         ${q.o.map((opt, i) => {
                             const id = i + 1;
                             const isSelected = state.userAnswers[state.idx].includes(id);
                             let colorClass = '';
-                            
                             if (state.isSubmitted) {
                                 if (q.c.includes(id)) colorClass = 'correct';
                                 else if (isSelected) colorClass = 'wrong';
                             }
-                            
-                            return `<button onclick="toggle(${id})" class="p-4 rounded-xl border border-slate-600 ${isSelected ? 'selected' : ''} ${colorClass}">
+                            return `<button onclick="toggle(${id})" class="p-4 rounded-xl border border-slate-600 transition ${isSelected ? 'selected' : ''} ${colorClass}">
                                 ${opt}
                             </button>`;
                         }).join('')}
                     </div>
                     <div class="flex gap-4">
-                        <button onclick="submit()" class="bg-blue-600 px-6 py-3 rounded-xl">تصحيح</button>
-                        <button onclick="next()" class="bg-emerald-600 px-6 py-3 rounded-xl">التالي</button>
+                        <button onclick="submit()" class="bg-blue-600 px-6 py-3 rounded-xl font-bold">تصحيح</button>
+                        <button onclick="next()" class="bg-emerald-600 px-6 py-3 rounded-xl font-bold">التالي</button>
                     </div>
                 </div>
             `;
@@ -103,7 +103,7 @@
             }
         }
 
-        render(); // Initial load
+        render();
     </script>
 </body>
 </html>
