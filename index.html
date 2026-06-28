@@ -65,9 +65,8 @@
                     ${state.view === 'quiz' ? `<div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>` : ''}
                     <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
                     ${state.view === 'quiz' ? `<button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>` : ''}
-                    <button onclick="${state.view === 'review' ? 'state.view = \'result\'; render();' : 'next()'}" class="w-full bg-blue-600 py-3 rounded font-bold">
-                        ${state.view === 'review' ? 'العودة للنتائج' : 'السؤال التالي'}
-                    </button>
+                    ${state.view === 'review' ? `<button onclick="state.view = 'result'; render();" class="w-full bg-emerald-600 py-3 rounded font-bold">حفظ التغييرات</button>` : ''}
+                    <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
                 </div>
                 <div class="col-span-3 flex flex-col gap-6">
                     <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
@@ -77,8 +76,9 @@
                             ${q.o.map((opt, i) => {
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
+                                // Always show colors in review mode to see feedback
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<div class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</div>`;
+                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
                             }).join('')}
                         </div>
                     </div>
@@ -92,12 +92,29 @@
             render();
         }
 
-        function toggle(id) { if(!state.isSubmitted && state.view === 'quiz') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
+        function toggle(id) { 
+            // Now allows toggling during both quiz and review modes
+            if(!state.isSubmitted || state.view === 'review') { 
+                const arr = state.userAnswers[state.idx]; 
+                const i = arr.indexOf(id); 
+                if(i > -1) arr.splice(i, 1); else arr.push(id); 
+                render(); 
+            } 
+        }
+
         function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
+        
         function next() { 
             clearInterval(timerInterval);
-            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
-            else { state.view = 'result'; render(); } 
+            if (state.idx < questions.length - 1) { 
+                state.idx++; 
+                state.isSubmitted = false; 
+                startTimer(); 
+                render(); 
+            } else { 
+                state.view = 'result'; 
+                render(); 
+            } 
         }
 
         startTimer();
