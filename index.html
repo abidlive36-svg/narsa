@@ -12,6 +12,8 @@
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
         .correct { background: #059669 !important; border-color: #10b981 !important; }
         .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
+        /* Force image container to have a fixed height so it never disappears */
+        .img-box { height: 300px; }
     </style>
 </head>
 <body class="min-h-screen p-2 flex flex-col text-slate-200">
@@ -23,8 +25,8 @@
     <div class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
         
         <div class="flex flex-col gap-4 order-1 md:col-span-2">
-            <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
-                <img id="q-img" src="" class="w-full h-full object-contain" alt="Question Image">
+            <div class="img-box bg-slate-950 rounded-xl border border-slate-700 flex items-center justify-center overflow-hidden">
+                <img id="q-img" src="" class="max-h-full w-auto object-contain" alt="Question Image">
             </div>
             <div class="glass p-4 rounded-xl border border-slate-700">
                 <p id="q-text" class="text-lg font-bold mb-2"></p>
@@ -63,7 +65,11 @@
         function loadQ() {
             selected = []; answered = false;
             const d = questions[idx];
-            document.getElementById('q-img').src = `static/images/${d.img}`;
+            
+            // Fix: encodeURI handles spaces and parentheses in filenames
+            const imgEl = document.getElementById('q-img');
+            imgEl.src = encodeURI(`static/images/${d.img}`);
+            
             document.getElementById('q-text').innerText = d.q;
             
             const list = document.getElementById('options');
