@@ -5,11 +5,13 @@
     <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
+        body { background: #0b1120; color: #e2e8f0; font-family: sans-serif; }
         .glass { background: #1e293b; border: 1px solid #334155; }
-        .selected { border: 2px solid #3b82f6 !important; }
+        .selected { border: 2px solid #3b82f6 !important; background: #1e3a8a !important; }
         .correct { background: #065f46 !important; border-color: #059669 !important; color: white !important; }
         .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white !important; }
+        /* NARSA-style right sidebar */
+        .narsa-btn { background: #3b82f6; color: white; padding: 12px; border-radius: 4px; text-align: center; font-weight: bold; margin-bottom: 8px; border: 2px solid #2563eb; }
     </style>
 </head>
 <body class="p-6">
@@ -19,7 +21,8 @@
     <script>
         const questions = [
             { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" },
+            { q: "إلا نسبة الكحول في الهواء المنبعث من الفم تجاوزات 0,10 كيتعرض السائق لخصم:", o: ["4 النقط", "6 النقط", "8 النقط"], c: [3], img: "q3.webp" }
         ];
 
         let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
@@ -42,65 +45,47 @@
 
         function render() {
             const app = document.getElementById('app');
-            
             if (state.view === 'result') {
                 const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
-                app.innerHTML = `
-                    <div class="col-span-4 glass p-10 rounded-xl text-center">
-                        <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
-                        <div class="grid grid-cols-5 gap-4 mb-8">
-                            ${questions.map((_, i) => {
-                                const isCorrect = JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort());
-                                return `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`;
-                            }).join('')}
-                        </div>
-                        <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
-                    </div>`;
+                app.innerHTML = `<div class="col-span-4 glass p-10 rounded-xl text-center">
+                    <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
+                    <div class="grid grid-cols-5 gap-4 mb-8">${questions.map((_, i) => `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort()) ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`).join('')}</div>
+                    <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
+                </div>`;
                 return;
             }
 
             const q = questions[state.idx];
             app.innerHTML = `
-                <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
-                    ${state.view === 'quiz' ? `<div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>` : ''}
-                    <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
-                    ${state.view === 'quiz' ? `<button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>` : ''}
-                    ${state.view === 'review' ? `<button onclick="state.view = 'result'; render();" class="w-full bg-emerald-600 py-3 rounded font-bold">حفظ التغييرات</button>` : ''}
-                    <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
-                </div>
-                <div class="col-span-3 flex flex-col gap-6">
-                    <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
-                    <div class="glass p-6 rounded-xl">
-                        <h2 class="text-xl mb-6">${q.q}</h2>
-                        <div class="space-y-3">
+                <div class="col-span-3 flex flex-col gap-4">
+                    <div class="glass p-2 rounded"><img src="static/images/${q.img}" class="w-full rounded"></div>
+                    <div class="glass p-6 rounded">
+                        <h2 class="text-xl mb-4 font-bold">${q.q}</h2>
+                        <div class="space-y-2">
                             ${q.o.map((opt, i) => {
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">
-                                            <span class="font-bold ml-2 inline-block w-6">${id}.</span> ${opt}
-                                        </button>`;
+                                return `<button onclick="toggle(${id})" class="w-full text-right p-3 rounded border border-slate-600 ${isSel?'selected':''} ${cls}"><span class="font-bold ml-2">${id}.</span> ${opt}</button>`;
                             }).join('')}
                         </div>
                     </div>
+                </div>
+                <!-- NARSA Right Sidebar -->
+                <div class="col-span-1 flex flex-col gap-2">
+                    <div class="glass p-4 rounded text-center mb-4">
+                        <div class="text-3xl font-bold ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">${state.timeLeft}</div>
+                    </div>
+                    ${[1, 2, 3, 4].map(n => `<div class="narsa-btn">${n}</div>`).join('')}
+                    <button onclick="submit()" class="bg-emerald-600 p-4 rounded font-bold mt-2">تصحيح</button>
+                    <button onclick="next()" class="bg-blue-600 p-4 rounded font-bold">التالي</button>
                 </div>`;
         }
 
         function reviewQ(i) { state.idx = i; state.view = 'review'; state.isSubmitted = true; render(); }
-        function toggle(id) { 
-            if(!state.isSubmitted || state.view === 'review') { 
-                const arr = state.userAnswers[state.idx]; 
-                const i = arr.indexOf(id); 
-                if(i > -1) arr.splice(i, 1); else arr.push(id); 
-                render(); 
-            } 
-        }
+        function toggle(id) { if(!state.isSubmitted || state.view === 'review') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
         function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
-        function next() { 
-            clearInterval(timerInterval);
-            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
-            else { state.view = 'result'; render(); } 
-        }
+        function next() { clearInterval(timerInterval); if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } else { state.view = 'result'; render(); } }
 
         startTimer();
         render();
