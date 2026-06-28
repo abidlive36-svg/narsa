@@ -18,17 +18,17 @@
 
     <script>
         const questions = [
-            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" },
-            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعوب:", o: ["نعم", "لا"], c: [1], img: "q3.webp" },
-            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "شيك بنكي باسم صاحب المخالفة", "شيك بنكي باسم احد الراكبين"], c: [2], img: "q4.webp" },
-            { q: "على الطريق السيار فرق السرعة مع هاد الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [3], img: "q5.webp" },
-            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "q6.webp" },
-            { q: "هاد العلامة كتعنل على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "q7.webp" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q8.webp" },
-            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة في:", o: ["1", "2", "3", "4"], c: [1], img: "q9.webp" },
-            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان النقط ما يمكنش ليا نجتاز الإمتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 لشهر"], c: [4], img: "q10.webp" },
-            { q: "فالمملكة المغربية، عدد القتلى ديال الراجليين كيمثل:", o: ["10 % من قتلى حوادث السير", "20 % من قتلى حوادث السير", "أكثر من 25 % من قتلى حوادث السير"], c: [3], img: "q11.webp" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1] },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1] },
+            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعوب:", o: ["نعم", "لا"], c: [1] },
+            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "شيك بنكي باسم صاحب المخالفة", "شيك بنكي باسم احد الراكبين"], c: [2] },
+            { q: "على الطريق السيار فرق السرعة مع هاد الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [3] },
+            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3] },
+            { q: "هاد العلامة كتعنل على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4] },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1] },
+            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة في:", o: ["1", "2", "3", "4"], c: [1] },
+            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان النقط ما يمكنش ليا نجتاز الإمتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 لشهر"], c: [4] },
+            { q: "فالمملكة المغربية، عدد القتلى ديال الراجليين كيمثل:", o: ["10 % من قتلى حوادث السير", "20 % من قتلى حوادث السير", "أكثر من 25 % من قتلى حوادث السير"], c: [3] }
         ];
 
         let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
@@ -42,36 +42,38 @@
                 if (state.timeLeft <= 0) {
                     clearInterval(timerInterval);
                     state.isSubmitted = true;
-                    render();
-                    setTimeout(next, 2000);
-                } else {
-                    render(); // Only re-render if time remains
                 }
+                render();
             }, 1000);
         }
 
         function render() {
             const app = document.getElementById('app');
-            if (state.view === 'result') return; // Result view handles its own rendering
+            if (state.view === 'result') return;
 
             const q = questions[state.idx];
+            const imgPath = `q${state.idx + 1}.webp`; 
+
             app.innerHTML = `
                 <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-4">
                     <div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>
-                    <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
+                    <div class="text-lg font-bold">السؤال ${state.idx + 1} / ${questions.length}</div>
                     <button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>
                     <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
                 </div>
                 <div class="col-span-3 flex flex-col gap-4">
-                    <div class="glass p-2 rounded-xl"><img src="${q.img}" class="w-full rounded-lg h-64 object-contain"></div>
+                    <div class="glass p-2 rounded-xl">
+                        <img src="${imgPath}" class="w-full rounded-lg h-64 object-contain" onerror="this.style.display='none'">
+                        <div class="text-center p-2 text-sm text-gray-400">صورة السؤال رقم ${state.idx + 1}</div>
+                    </div>
                     <div class="glass p-6 rounded-xl">
-                        <h2 class="text-xl mb-4">${q.q}</h2>
+                        <h2 class="text-xl mb-4">${state.idx + 1}. ${q.q}</h2>
                         <div class="space-y-2">
                             ${q.o.map((opt, i) => {
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
-                                return `<button onclick="toggle(${id})" class="w-full text-right p-3 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
+                                return `<button onclick="toggle(${id})" class="w-full text-right p-3 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${id}. ${opt}</button>`;
                             }).join('')}
                         </div>
                     </div>
