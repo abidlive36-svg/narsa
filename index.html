@@ -10,8 +10,8 @@
         body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
-        .correct { background: #059669 !important; border-color: #10b981 !important; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
+        .correct { background: #059669 !important; border-color: #10b981 !important; color: white; }
+        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white; }
     </style>
 </head>
 <body class="min-h-screen p-2 flex flex-col text-slate-200">
@@ -20,13 +20,13 @@
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
     </div>
 
-    <!-- Review Section -->
     <div id="review-screen" class="hidden max-w-5xl mx-auto mt-10 p-6 glass rounded-xl">
         <h2 class="text-2xl font-bold mb-4">نتائج الاختبار</h2>
         <div id="result-grid" class="grid grid-cols-5 gap-4"></div>
     </div>
 
     <div id="quiz-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
+        
         <div class="flex flex-col gap-4 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-contain" alt="Question Image">
@@ -61,7 +61,7 @@
             { q: "فالمملكة المغربية، عدد القتلى ديال الراجلين كيمثل:", o: ["10% من قتلى حوادث السير", "20% من قتلى حوادث السير", "أكثر من 25% من قتل حوادث السير"], c: [3], img: "Screenshot (92).jpg", audioQ: "q92_q.mp3", audioE: "q92_exp.mp3" }
         ];
 
-        let idx = 0, selected = [], answered = false, results = new Array(questions.length).fill(null);
+        let idx = 0, selected = [], answered = false, results = new Array(questions.length).fill(null), userAnswers = new Array(questions.length).fill([]);
 
         function startQuiz() {
             document.getElementById('start-screen').style.display = 'none';
@@ -69,7 +69,8 @@
         }
 
         function loadQ() {
-            selected = []; answered = false;
+            selected = userAnswers[idx] || []; 
+            answered = (results[idx] !== null);
             document.querySelectorAll('.option-active, .correct, .wrong').forEach(el => el.classList.remove('option-active', 'correct', 'wrong'));
             
             const d = questions[idx];
@@ -85,9 +86,12 @@
             list.innerHTML = ''; btns.innerHTML = '';
             
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between" onclick="toggle(${i+1})" id="row-${i+1}"><span>${opt}</span></div>`;
-                btns.innerHTML += `<button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
+                let activeClass = selected.includes(i+1) ? 'option-active' : '';
+                list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between ${activeClass}" onclick="toggle(${i+1})" id="row-${i+1}"><span>${opt}</span></div>`;
+                btns.innerHTML += `<button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700 ${activeClass}" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
             });
+
+            if (answered) applyStyles();
         }
 
         function toggle(id) {
@@ -97,13 +101,18 @@
             const i = selected.indexOf(id);
             if (i > -1) { selected.splice(i, 1); btn.classList.remove('option-active'); row.classList.remove('option-active'); }
             else { selected.push(id); btn.classList.add('option-active'); row.classList.add('option-active'); }
+            userAnswers[idx] = [...selected];
         }
 
         function checkAnswer() {
-            if (answered) return;
+            if (answered || selected.length === 0) return;
             answered = true;
             const isCorrect = JSON.stringify(selected.sort()) === JSON.stringify(questions[idx].c.sort());
             results[idx] = isCorrect;
+            applyStyles();
+        }
+
+        function applyStyles() {
             questions[idx].c.forEach(id => {
                 document.getElementById(`row-${id}`)?.classList.add('correct');
                 document.getElementById(`btn-${id}`)?.classList.add('correct');
@@ -117,9 +126,8 @@
         }
 
         function nextQ() {
-            if (idx < questions.length - 1) { 
-                idx++; loadQ(); 
-            } else { showResults(); }
+            if (idx < questions.length - 1) { idx++; loadQ(); } 
+            else { showResults(); }
         }
 
         function showResults() {
@@ -138,11 +146,6 @@
             document.getElementById('quiz-container').classList.remove('hidden');
             document.getElementById('review-screen').classList.add('hidden');
             loadQ();
-            answered = true;
-            questions[idx].c.forEach(id => {
-                document.getElementById(`row-${id}`)?.classList.add('correct');
-                document.getElementById(`btn-${id}`)?.classList.add('correct');
-            });
         }
     </script>
 </body>
