@@ -2,54 +2,73 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Modern NARSA UI</title>
+    <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
-        .bg-panel { background: #131b2e; border: 1px solid #1e293b; }
-        .btn-option { border-bottom: 1px dashed #475569; }
-        .selected { background: #1e3a8a; border-color: #3b82f6; }
-        .correct { background: #065f46; }
-        .wrong { background: #991b1b; }
+        .glass { background: #1e293b; border: 1px solid #334155; }
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .answer-btn { background: #334155; border: 1px solid #475569; padding: 1.5rem; text-align: center; border-radius: 4px; font-weight: bold; }
+        .selected { border: 2px solid #3b82f6 !important; }
+        .correct { background: #065f46 !important; color: white !important; }
+        .wrong { background: #991b1b !important; color: white !important; }
     </style>
 </head>
-<body class="p-6">
+<body class="p-8">
 
-    <div id="app" class="max-w-6xl mx-auto p-4 bg-panel rounded-lg">
-        <div class="text-white text-left mb-4 font-bold">السؤال 1/1</div>
-        
-        <div class="grid grid-cols-4 gap-6">
-            <!-- Left Controls -->
-            <div class="col-span-1 space-y-4">
-                <div class="p-4 bg-[#1e293b] rounded">
-                    <div class="text-xs mb-2">مستوى الصوت</div>
-                    <div class="h-2 bg-blue-600 rounded"></div>
+    <div id="app" class="max-w-6xl mx-auto grid grid-cols-12 gap-6"></div>
+
+    <script>
+        const questions = [
+            { id: "q1", q: "وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كاتبترا جنحة كيتعاقب عليها:", o: ["بعقوبة حبسية", "بإيداع المركبة بالحجز", "بإتلاف المركبة", "بمصادرة المركبة لفائدة الدولة"], c: [1, 2] },
+            // Add more questions here following the same format
+        ];
+
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill([]), isSubmitted: false };
+
+        function render() {
+            const q = questions[state.idx];
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <!-- Sidebar (Left) -->
+                <div class="col-span-12 md:col-span-3 flex flex-col gap-4">
+                    <div class="glass p-4 rounded text-center">مستوى الصوت</div>
+                    <input type="range" class="w-full mb-4">
+                    <div class="btn-grid">
+                        ${[2, 1, 4, 3].map(num => `
+                            <button onclick="toggle(${num})" class="answer-btn ${state.userAnswers[state.idx].includes(num) ? 'selected' : ''}">
+                                ${num}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button onclick="state.isSubmitted = true; render();" class="bg-emerald-600 text-white py-3 rounded font-bold mt-2">Valider</button>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button class="bg-[#1e293b] p-6 rounded font-bold">2</button>
-                    <button class="bg-[#1e293b] p-6 rounded font-bold">1</button>
-                    <button class="bg-[#1e293b] p-6 rounded font-bold">4</button>
-                    <button class="bg-[#1e293b] p-6 rounded font-bold">3</button>
-                </div>
-                <button class="w-full bg-emerald-600 p-4 rounded font-bold text-white">Valider</button>
-            </div>
 
-            <!-- Main Scenario Image Area -->
-            <div class="col-span-3 bg-black rounded h-[300px] flex items-center justify-center text-gray-500">
-                Scenario Image
-            </div>
-        </div>
+                <!-- Main Content (Right) -->
+                <div class="col-span-12 md:col-span-9 flex flex-col gap-4">
+                    <div class="glass p-2 rounded"><img src="${q.id}.webp" class="w-full rounded h-80 object-cover"></div>
+                    <div class="glass p-6 rounded text-lg font-bold">${q.q}</div>
+                    <div class="space-y-2">
+                        ${q.o.map((opt, i) => {
+                            const num = i + 1;
+                            let cls = state.isSubmitted ? (q.c.includes(num) ? 'correct' : 'wrong') : '';
+                            return `<div class="glass p-4 rounded border-b border-dashed flex justify-between ${cls}">
+                                        <span>${opt}</span> <span>${num}</span>
+                                    </div>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+        }
 
-        <!-- Options Section -->
-        <div class="mt-6 p-6 bg-[#1e293b] rounded text-white">
-            <h2 class="mb-6 font-bold text-lg">وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كاتبتار جنحة كيتعاقب عليها:</h2>
-            <div class="space-y-4">
-                <div class="flex justify-between btn-option pb-2"><span>بعقوبة حبسية</span><span>1</span></div>
-                <div class="flex justify-between btn-option pb-2"><span>بإيداع المركبة بالحجز</span><span>2</span></div>
-                <div class="flex justify-between btn-option pb-2"><span>باتلاف المركبة</span><span>3</span></div>
-                <div class="flex justify-between btn-option pb-2"><span>بمصادرة المركبة لفائدة الدولة</span><span>4</span></div>
-            </div>
-        </div>
-    </div>
+        function toggle(num) {
+            if (state.isSubmitted) return;
+            let arr = state.userAnswers[state.idx];
+            if (arr.includes(num)) state.userAnswers[state.idx] = arr.filter(x => x !== num);
+            else state.userAnswers[state.idx].push(num);
+            render();
+        }
+
+        render();
+    </script>
 </body>
 </html>
