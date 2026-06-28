@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NARSA Quiz 2026</title>
+    <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
@@ -12,32 +12,33 @@
         .option-active { background: #3b82f6 !important; border-color: #60a5fa !important; }
         .correct { background: #059669 !important; border-color: #10b981 !important; }
         .wrong { background: #dc2626 !important; border-color: #ef4444 !important; }
-        /* Fix for image container */
-        #img-container { min-height: 250px; display: flex; align-items: center; justify-content: center; background: #000; }
     </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col items-center text-slate-200">
+<body class="min-h-screen p-4 text-slate-200">
 
-    <div class="max-w-xl w-full flex flex-col gap-4">
-        <!-- Image Container -->
-        <div id="img-container" class="rounded-xl border border-slate-700 overflow-hidden">
-            <img id="q-img" src="" class="max-h-80 w-full object-contain" alt="Question Image">
-        </div>
+    <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
         
-        <!-- Question Text -->
-        <div class="glass p-5 rounded-xl border border-slate-700">
-            <p id="q-text" class="text-lg font-bold mb-4 leading-relaxed"></p>
-            <div id="options" class="space-y-3"></div>
+        <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-6 order-2 md:order-1">
+            <input type="range" class="w-full accent-blue-500">
+            <div id="btn-grid" class="grid grid-cols-2 gap-2">
+                </div>
+            <button onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
+            <button onclick="nextQ()" class="bg-emerald-600 py-3 rounded-xl font-bold">السؤال التالي</button>
         </div>
 
-        <!-- Buttons -->
-        <div class="grid grid-cols-2 gap-4">
-            <button onclick="checkAnswer()" class="bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500">التصحيح</button>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold shadow-lg hover:bg-emerald-500">السؤال التالي</button>
+        <div class="md:col-span-2 flex flex-col gap-4 order-1 md:order-2">
+            <div class="bg-black rounded-xl border border-slate-700 overflow-hidden">
+                <img id="q-img" src="" class="w-full h-auto object-contain" alt="Question Image">
+            </div>
+            <div class="glass p-6 rounded-xl border border-slate-700">
+                <p id="q-text" class="text-xl font-bold mb-4"></p>
+                <div id="options" class="space-y-3"></div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Updated questions logic
         const questions = [
             { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
             { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
@@ -56,28 +57,33 @@
         function loadQ() {
             selected = []; answered = false;
             const d = questions[idx];
-            const imgEl = document.getElementById('q-img');
-            imgEl.src = `static/images/${d.img}`;
+            document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = d.q;
             
             const list = document.getElementById('options');
+            const btns = document.getElementById('btn-grid');
             list.innerHTML = '';
+            btns.innerHTML = '';
             
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-4 rounded-lg border border-slate-600 cursor-pointer flex gap-3 items-center hover:border-slate-400 transition" onclick="toggle(${i+1})" id="row-${i+1}">
-                    <span class="bg-slate-700 w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold">${i+1}</span> ${opt}
+                list.innerHTML += `<div class="p-3 border border-slate-600 rounded-lg cursor-pointer hover:border-slate-400" onclick="toggle(${i+1})" id="row-${i+1}">
+                    ${opt} ......................................... ${i+1}
                 </div>`;
+                btns.innerHTML += `<button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
             });
         }
 
         function toggle(id) {
             if (answered) return;
+            const btn = document.getElementById(`btn-${id}`);
             const row = document.getElementById(`row-${id}`);
             if (selected.includes(id)) {
                 selected = selected.filter(x => x !== id);
+                btn.classList.remove('option-active');
                 row.classList.remove('option-active');
             } else {
                 selected.push(id);
+                btn.classList.add('option-active');
                 row.classList.add('option-active');
             }
         }
@@ -86,17 +92,20 @@
             if (answered) return;
             answered = true;
             const correct = questions[idx].c;
-            correct.forEach(id => document.getElementById(`row-${id}`).classList.add('correct'));
+            correct.forEach(id => {
+                document.getElementById(`row-${id}`).classList.add('correct');
+                document.getElementById(`btn-${id}`).classList.add('correct');
+            });
             selected.forEach(id => {
-                if(!correct.includes(id)) document.getElementById(`row-${id}`).classList.add('wrong');
+                if(!correct.includes(id)) {
+                    document.getElementById(`row-${id}`).classList.add('wrong');
+                    document.getElementById(`btn-${id}`).classList.add('wrong');
+                }
             });
         }
 
         function nextQ() {
-            if (idx < questions.length - 1) {
-                idx++;
-                loadQ();
-            } else { alert("انتهى الاختبار!"); }
+            if (idx < questions.length - 1) { idx++; loadQ(); }
         }
 
         window.onload = loadQ;
