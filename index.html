@@ -9,24 +9,27 @@
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
         body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
-        .correct { background: #059669 !important; border-color: #10b981 !important; color: white !important; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white !important; }
+        /* Selection and Correct/Wrong Styles */
+        .option-active { background: #3b82f6 !important; color: white !important; border-color: #60a5fa !important; }
+        .correct { background: #059669 !important; color: white !important; border-color: #10b981 !important; }
+        .wrong { background: #dc2626 !important; color: white !important; border-color: #ef4444 !important; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col text-slate-200">
 
+    <!-- Start Screen -->
     <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
     </div>
 
-    <!-- Review/Score Section -->
+    <!-- Review Section -->
     <div id="review-screen" class="hidden max-w-4xl mx-auto mt-10 p-8 glass rounded-3xl w-full text-center">
         <h2 id="final-score" class="text-4xl font-bold mb-6"></h2>
         <div id="result-grid" class="grid grid-cols-5 gap-4 mb-8"></div>
         <button onclick="location.reload()" class="bg-slate-700 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
     </div>
 
+    <!-- Main Quiz Layout -->
     <div id="quiz-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-6 mt-4">
         <div class="flex flex-col gap-6 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
@@ -42,18 +45,15 @@
             <h3 class="text-center font-bold">لوحة التحكم</h3>
             <div class="grid grid-cols-2 gap-3" id="btn-grid"></div>
             <hr class="border-slate-700">
-            <button id="btn-check" onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
+            <button id="check-btn" onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
             <button onclick="nextQ()" class="bg-emerald-600 py-3 rounded-xl font-bold">السؤال التالي</button>
         </div>
     </div>
 
-    <audio id="audio-q"></audio>
-
     <script>
         const questions = [
-            { q: "رخصة السياقة مزورة؟", o: ["نعم", "لا"], c: [1], img: "q1.webp", audioQ: "q1_q.mp3" },
-            { q: "وضعية المقعد تؤثر على التعب؟", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg", audioQ: "q84_q.mp3" }
-            // Add all 10 here...
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
+            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "q84.jpg" }
         ];
 
         let idx = 0, selected = [], answered = false;
@@ -97,17 +97,28 @@
         function checkAnswer() {
             if (answered || selected.length === 0) return;
             answered = true;
-            results[idx] = JSON.stringify(selected.sort()) === JSON.stringify(questions[idx].c.sort());
+            
+            // Logic: Sort arrays and compare strings to check if user matched the correct array exactly
+            const correctSorted = [...questions[idx].c].sort((a, b) => a - b);
+            const userSorted = [...selected].sort((a, b) => a - b);
+            results[idx] = JSON.stringify(correctSorted) === JSON.stringify(userSorted);
+            
             highlightResults();
         }
 
         function highlightResults() {
             const d = questions[idx];
-            // Green for correct answers (must be highlighted even if user didn't pick them)
-            d.c.forEach(id => document.getElementById(`row-${id}`)?.classList.add('correct'));
-            // Red for user's wrong choices
+            // Highlight correct answers in GREEN
+            d.c.forEach(id => {
+                document.getElementById(`row-${id}`)?.classList.add('correct');
+                document.getElementById(`btn-${id}`)?.classList.add('correct');
+            });
+            // Highlight user's wrong choices in RED
             selected.forEach(id => {
-                if(!d.c.includes(id)) document.getElementById(`row-${id}`)?.classList.add('wrong');
+                if (!d.c.includes(id)) {
+                    document.getElementById(`row-${id}`)?.classList.add('wrong');
+                    document.getElementById(`btn-${id}`)?.classList.add('wrong');
+                }
             });
         }
 
