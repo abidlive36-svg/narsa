@@ -10,27 +10,24 @@
         body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
-        .correct { background: #059669 !important; border-color: #10b981 !important; color: white; }
-        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white; }
+        .correct { background: #059669 !important; border-color: #10b981 !important; color: white !important; }
+        .wrong { background: #dc2626 !important; border-color: #ef4444 !important; color: white !important; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col text-slate-200">
 
-    <!-- Start Screen -->
     <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
         <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
     </div>
 
-    <!-- Review Section -->
-    <div id="review-screen" class="hidden max-w-5xl mx-auto mt-10 p-6 glass rounded-xl w-full">
-        <h2 class="text-2xl font-bold mb-4">نتائج الاختبار - اضغط على السؤال للمراجعة</h2>
-        <div id="result-grid" class="grid grid-cols-5 gap-4"></div>
+    <!-- Review/Score Section -->
+    <div id="review-screen" class="hidden max-w-4xl mx-auto mt-10 p-8 glass rounded-3xl w-full text-center">
+        <h2 id="final-score" class="text-4xl font-bold mb-6"></h2>
+        <div id="result-grid" class="grid grid-cols-5 gap-4 mb-8"></div>
+        <button onclick="location.reload()" class="bg-slate-700 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
     </div>
 
-    <!-- Main Quiz Layout -->
     <div id="quiz-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-6 mt-4">
-        
-        <!-- Left: Image and Question -->
         <div class="flex flex-col gap-6 order-1 md:col-span-2">
             <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
                 <img id="q-img" src="" class="w-full h-full object-contain" alt="Question Image">
@@ -41,28 +38,27 @@
             </div>
         </div>
 
-        <!-- Right: Menu/Controls -->
         <div class="glass rounded-xl p-6 border border-slate-700 flex flex-col gap-4 order-2 h-fit">
             <h3 class="text-center font-bold">لوحة التحكم</h3>
             <div class="grid grid-cols-2 gap-3" id="btn-grid"></div>
             <hr class="border-slate-700">
-            <button onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
+            <button id="btn-check" onclick="checkAnswer()" class="bg-blue-600 py-3 rounded-xl font-bold">التصحيح</button>
             <button onclick="nextQ()" class="bg-emerald-600 py-3 rounded-xl font-bold">السؤال التالي</button>
         </div>
     </div>
 
     <audio id="audio-q"></audio>
-    <audio id="audio-exp"></audio>
 
     <script>
         const questions = [
-            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp", audioQ: "q1_q.mp3", audioE: "q1_exp.mp3" },
-            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg", audioQ: "q84_q.mp3", audioE: "q84_exp.mp3" }
-            // Add other questions here...
+            { q: "رخصة السياقة مزورة؟", o: ["نعم", "لا"], c: [1], img: "q1.webp", audioQ: "q1_q.mp3" },
+            { q: "وضعية المقعد تؤثر على التعب؟", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg", audioQ: "q84_q.mp3" }
+            // Add all 10 here...
         ];
 
         let idx = 0, selected = [], answered = false;
         let results = new Array(questions.length).fill(null);
+        let userChoices = new Array(questions.length).fill([]);
 
         function startQuiz() {
             document.getElementById('start-screen').style.display = 'none';
@@ -70,82 +66,66 @@
         }
 
         function loadQ() {
-            // Strictly reset state for the new question
-            selected = []; 
-            answered = false;
+            selected = userChoices[idx] || [];
+            answered = (results[idx] !== null);
             
             const d = questions[idx];
             document.getElementById('q-img').src = `static/images/${d.img}`;
             document.getElementById('q-text').innerText = `${idx + 1}. ${d.q}`;
             
-            // Play Audio
-            const qAudio = document.getElementById('audio-q');
-            qAudio.src = `static/sounds/${d.audioQ}`;
-            qAudio.play();
-            
             const list = document.getElementById('options');
             const btns = document.getElementById('btn-grid');
-            list.innerHTML = ''; 
-            btns.innerHTML = '';
+            list.innerHTML = ''; btns.innerHTML = '';
             
             d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700" onclick="toggle(${i+1})" id="row-${i+1}">${opt}</div>`;
-                btns.innerHTML += `<button class="bg-slate-800 py-2 rounded-xl font-bold border border-slate-700" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
+                let isSel = selected.includes(i+1) ? 'option-active' : '';
+                list.innerHTML += `<div class="p-4 rounded-xl border border-slate-700 cursor-pointer ${isSel}" onclick="toggle(${i+1})" id="row-${i+1}">${opt}</div>`;
+                btns.innerHTML += `<button class="bg-slate-800 py-2 rounded-xl font-bold border border-slate-700 ${isSel}" onclick="toggle(${i+1})" id="btn-${i+1}">${i+1}</button>`;
             });
+
+            if (answered) highlightResults();
         }
 
         function toggle(id) {
             if (answered) return;
-            const btn = document.getElementById(`btn-${id}`);
-            const row = document.getElementById(`row-${id}`);
             const i = selected.indexOf(id);
-            
-            if (i > -1) { 
-                selected.splice(i, 1); 
-                btn.classList.remove('option-active'); 
-                row.classList.remove('option-active'); 
-            } else { 
-                selected.push(id); 
-                btn.classList.add('option-active'); 
-                row.classList.add('option-active'); 
-            }
+            if (i > -1) selected.splice(i, 1); else selected.push(id);
+            userChoices[idx] = [...selected];
+            loadQ();
         }
 
         function checkAnswer() {
             if (answered || selected.length === 0) return;
             answered = true;
             results[idx] = JSON.stringify(selected.sort()) === JSON.stringify(questions[idx].c.sort());
-            
-            // Show colors
-            questions[idx].c.forEach(id => {
-                document.getElementById(`row-${id}`)?.classList.add('correct');
-                document.getElementById(`btn-${id}`)?.classList.add('correct');
-            });
+            highlightResults();
+        }
+
+        function highlightResults() {
+            const d = questions[idx];
+            // Green for correct answers (must be highlighted even if user didn't pick them)
+            d.c.forEach(id => document.getElementById(`row-${id}`)?.classList.add('correct'));
+            // Red for user's wrong choices
             selected.forEach(id => {
-                if(!questions[idx].c.includes(id)) {
-                    document.getElementById(`row-${id}`)?.classList.add('wrong');
-                    document.getElementById(`btn-${id}`)?.classList.add('wrong');
-                }
+                if(!d.c.includes(id)) document.getElementById(`row-${id}`)?.classList.add('wrong');
             });
         }
 
         function nextQ() {
-            if (idx < questions.length - 1) { 
-                idx++; 
-                loadQ(); 
-            } else { 
-                showResults(); 
-            }
+            if (idx < questions.length - 1) { idx++; loadQ(); } 
+            else { showScore(); }
         }
 
-        function showResults() {
+        function showScore() {
             document.getElementById('quiz-container').classList.add('hidden');
             const review = document.getElementById('review-screen');
             review.classList.remove('hidden');
+            const score = results.filter(r => r === true).length;
+            document.getElementById('final-score').innerText = `نتيجتك: ${score} / ${questions.length}`;
+            
             const grid = document.getElementById('result-grid');
-            grid.innerHTML = '';
             results.forEach((res, i) => {
-                grid.innerHTML += `<button onclick="goToQ(${i})" class="p-6 rounded-xl font-bold ${res ? 'bg-emerald-600' : 'bg-red-600'}">سؤال ${i+1}</button>`;
+                grid.innerHTML += `<button onclick="goToQ(${i})" class="p-6 rounded-xl font-bold ${res ? 'bg-emerald-600' : 'bg-red-600'}">${i+1}</button>`;
             });
         }
 
@@ -154,10 +134,6 @@
             document.getElementById('quiz-container').classList.remove('hidden');
             document.getElementById('review-screen').classList.add('hidden');
             loadQ();
-            // Force re-evaluation so the answers appear already marked
-            answered = false; 
-            checkAnswer(); 
-            answered = true;
         }
     </script>
 </body>
