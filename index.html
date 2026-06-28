@@ -2,87 +2,105 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Modern NARSA UI</title>
+    <title>NARSA Quiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
-        .bg-panel { background: #131b2e; border: 1px solid #1e293b; }
-        .selected { background: #1e3a8a !important; border-color: #3b82f6 !important; }
-        .btn-option { border-bottom: 1px dashed #475569; display: flex; justify-content: space-between; width: 100%; padding: 10px; cursor: pointer; }
+        .glass { background: #1e293b; border: 1px solid #334155; }
+        .selected { border: 2px solid #3b82f6 !important; }
+        .correct { background: #065f46 !important; border-color: #059669 !important; color: white !important; }
+        .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white !important; }
     </style>
 </head>
 <body class="p-6">
 
-    <div id="app" class="max-w-6xl mx-auto p-4 bg-panel rounded-lg">
-        <div id="question-count" class="text-white text-left mb-4 font-bold"></div>
-        
-        <div class="grid grid-cols-4 gap-6">
-            <div class="col-span-1 space-y-4">
-                <div class="p-4 bg-[#1e293b] rounded">
-                    <div class="text-xs mb-2">مستوى الصوت</div>
-                    <div class="h-2 bg-blue-600 rounded"></div>
-                </div>
-                <div id="control-grid" class="grid grid-cols-2 gap-2"></div>
-                <button onclick="checkAnswer()" class="w-full bg-emerald-600 p-4 rounded font-bold text-white">Valider</button>
-            </div>
-
-            <div class="col-span-3 bg-black rounded h-[300px] flex items-center justify-center text-gray-500">
-                <img id="scenario-img" src="" alt="Scenario" class="max-h-full">
-            </div>
-        </div>
-
-        <div class="mt-6 p-6 bg-[#1e293b] rounded text-white">
-            <h2 id="question-text" class="mb-6 font-bold text-lg"></h2>
-            <div id="options-list" class="space-y-4"></div>
-        </div>
-    </div>
+    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6"></div>
 
     <script>
         const questions = [
-            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
-            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعوب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
-            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "شيك بنكي باسم صاحب المخالفة", "شيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg" },
-            { q: "على الطريق السيار فرق السرعة مع هاد الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [3], img: "Screenshot (86).jpg" },
-            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "Screenshot (87).jpg" },
-            { q: "هاد العلامة كتعنل على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "Screenshot (88).jpg" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "Screenshot (89).jpg" },
-            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة في:", o: ["1", "2", "3", "4"], c: [1], img: "Screenshot (90).jpg" },
-            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان النقط ما يمكنش ليا نجتاز الإمتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 لشهر"], c: [4], img: "Screenshot (91).jpg" },
-            { q: "فالمملكة المغربية، عدد القتلى ديال الراجليين كيمثل:", o: ["10 % من قتلى حوادث السير", "20 % من قتلى حوادث السير", "أكثر من 25 % من قتلى حوادث السير"], c: [3], img: "Screenshot (92).jpg" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
         ];
 
-        let idx = 0;
-        let userAnswers = Array(questions.length).fill().map(() => []);
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
+        let timerInterval;
 
-        function render() {
-            const q = questions[idx];
-            document.getElementById('question-count').innerText = `السؤال ${idx + 1}/${questions.length}`;
-            document.getElementById('question-text').innerText = q.q;
-            document.getElementById('scenario-img').src = q.img;
-
-            const opts = document.getElementById('options-list');
-            opts.innerHTML = q.o.map((opt, i) => `
-                <div onclick="toggle(${i + 1})" class="btn-option ${userAnswers[idx].includes(i + 1) ? 'selected' : ''}">
-                    <span>${opt}</span>
-                    <span class="font-bold">${i + 1}</span>
-                </div>
-            `).join('');
-
-            const grid = document.getElementById('control-grid');
-            grid.innerHTML = q.o.map((_, i) => `<button class="bg-[#1e293b] p-6 rounded font-bold ${userAnswers[idx].includes(i + 1) ? 'selected' : ''}">${i + 1}</button>`).join('');
+        function startTimer() {
+            clearInterval(timerInterval);
+            state.timeLeft = 15;
+            timerInterval = setInterval(() => {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    state.isSubmitted = true;
+                    render();
+                    setTimeout(next, 2000);
+                }
+                render();
+            }, 1000);
         }
 
-        function toggle(n) {
-            const arr = userAnswers[idx];
-            arr.includes(n) ? arr.splice(arr.indexOf(n), 1) : arr.push(n);
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'result') {
+                const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
+                app.innerHTML = `
+                    <div class="col-span-4 glass p-10 rounded-xl text-center">
+                        <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
+                        <div class="grid grid-cols-5 gap-4 mb-8">
+                            ${questions.map((_, i) => {
+                                const isCorrect = JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort());
+                                return `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`;
+                            }).join('')}
+                        </div>
+                        <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
+                    </div>`;
+                return;
+            }
+
+            const q = questions[state.idx];
+            app.innerHTML = `
+                <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
+                    ${state.view === 'quiz' ? `<div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>` : ''}
+                    <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
+                    ${state.view === 'quiz' ? `<button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>` : ''}
+                    <button onclick="${state.view === 'review' ? 'state.view = \'result\'; render();' : 'next()'}" class="w-full bg-blue-600 py-3 rounded font-bold">
+                        ${state.view === 'review' ? 'العودة للنتائج' : 'السؤال التالي'}
+                    </button>
+                </div>
+                <div class="col-span-3 flex flex-col gap-6">
+                    <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
+                    <div class="glass p-6 rounded-xl">
+                        <h2 class="text-xl mb-6">${q.q}</h2>
+                        <div class="space-y-3">
+                            ${q.o.map((opt, i) => {
+                                const id = i + 1;
+                                const isSel = state.userAnswers[state.idx].includes(id);
+                                let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
+                                return `<div class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        function reviewQ(i) {
+            state.idx = i;
+            state.view = 'review';
+            state.isSubmitted = true;
             render();
         }
 
-        function checkAnswer() {
-            console.log("Selected:", userAnswers[idx]);
-            // Add your logic for feedback here
+        function toggle(id) { if(!state.isSubmitted && state.view === 'quiz') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
+        function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
+        function next() { 
+            clearInterval(timerInterval);
+            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
+            else { state.view = 'result'; render(); } 
         }
 
+        startTimer();
         render();
     </script>
 </body>
