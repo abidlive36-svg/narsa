@@ -18,8 +18,16 @@
 
     <script>
         const questions = [
-            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
-            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "Screenshot (83).jpg" },
+            { q: "الوضعية الصحيحة لمقعد ديال السياقة كتأثر فظهور العلامات الأولى فالتعوب:", o: ["نعم", "لا"], c: [1], img: "Screenshot (84).jpg" },
+            { q: "من الممكن نخلص الغرامة لعون محرر المحضر:", o: ["بالفلوس", "شيك بنكي باسم صاحب المخالفة", "شيك بنكي باسم احد الراكبين"], c: [2], img: "Screenshot (85).jpg" },
+            { q: "على الطريق السيار فرق السرعة مع هاد الحافلة يمكن يكون على الأقل:", o: ["20 كلم فالساعة", "40 كلم فالساعة", "50 كلم فالساعة"], c: [3], img: "Screenshot (86).jpg" },
+            { q: "من القواعد ديال السياقة الإقتصادية:", o: ["الإكثار من عمليات الوقوف", "التقليل من عمليات الوقوف", "استباق التغييرات فوتيرة السير"], c: [2, 3], img: "Screenshot (87).jpg" },
+            { q: "هاد العلامة كتعنل على منعرجات متابعة:", o: ["على بعد 150 مترو", "على بعد 5 كيلومتر", "على طول 150 مترو", "على طول 5 كيلومتر"], c: [4], img: "Screenshot (88).jpg" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "Screenshot (89).jpg" },
+            { q: "العلامة اللي كتدل على المكان ديال مؤشر التآكل موجودة في:", o: ["1", "2", "3", "4"], c: [1], img: "Screenshot (90).jpg" },
+            { q: "بعد ما سلمت رخصة السياقة الملغاة بسبب فقدان النقط ما يمكنش ليا نجتاز الإمتحان من جديد إلا بعد:", o: ["3 شهور", "6 شهور", "9 شهور", "12 لشهر"], c: [4], img: "Screenshot (91).jpg" },
+            { q: "فالمملكة المغربية، عدد القتلى ديال الراجليين كيمثل:", o: ["10 % من قتلى حوادث السير", "20 % من قتلى حوادث السير", "أكثر من 25 % من قتلى حوادث السير"], c: [3], img: "Screenshot (92).jpg" }
         ];
 
         let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
@@ -69,14 +77,13 @@
                     <button onclick="next()" class="w-full bg-blue-600 py-3 rounded font-bold">السؤال التالي</button>
                 </div>
                 <div class="col-span-3 flex flex-col gap-6">
-                    <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
+                    <div class="glass p-2 rounded-xl"><img src="${q.img}" class="w-full rounded-lg"></div>
                     <div class="glass p-6 rounded-xl">
                         <h2 class="text-xl mb-6">${q.q}</h2>
                         <div class="space-y-3">
                             ${q.o.map((opt, i) => {
                                 const id = i + 1;
                                 const isSel = state.userAnswers[state.idx].includes(id);
-                                // Always show colors in review mode to see feedback
                                 let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
                                 return `<button onclick="toggle(${id})" class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</button>`;
                             }).join('')}
@@ -93,7 +100,6 @@
         }
 
         function toggle(id) { 
-            // Now allows toggling during both quiz and review modes
             if(!state.isSubmitted || state.view === 'review') { 
                 const arr = state.userAnswers[state.idx]; 
                 const i = arr.indexOf(id); 
