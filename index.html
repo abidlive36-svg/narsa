@@ -10,6 +10,8 @@
         body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
+        .bg-correct { background: #065f46 !important; border-color: #059669 !important; }
+        .bg-wrong { background: #991b1b !important; border-color: #dc2626 !important; }
     </style>
 </head>
 <body class="min-h-screen p-2 flex flex-col text-slate-200">
@@ -21,80 +23,123 @@
     <audio id="audio-q"></audio>
     <audio id="audio-exp"></audio>
 
-    <!-- Changed order for mobile: Question first, then Controls -->
-    <div class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
+    <div id="main-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
+        </div>
+
+<script>
+const questions = [
+    { q: "تقرب من طريق فيها حدبات؟", o: ["نعم", "لا"], c: [1], audioQ: "q8.mp3" },
+    { q: "كيشمل خصم النقط فنفس الوقت جميع أصناف رخصة السياقة اللي حصلت عليها:", o: ["صحيح", "خطأ"], c: [1], audioQ: "q10.mp3" },
+    { q: "هاد العلامة كتعلم على:", o: ["طريق ذات أولوية عند ملتقى الطرق اللي جاي", "طريق ذات أولوية المرور", "ملتقى الطرق", "حق الأسبقية للي جاي من ليمن"], c: [1], audioQ: "q11.mp3" },
+    { q: "كتمكن تقنية البلوتوث من ربط الهاتف النقال بالنظام المدمج للسيارة:", o: ["نعم", "لا"], c: [1], audioQ: "q12.mp3" },
+    { q: "هاد اللوحة كتعلم على: محطة الاستراحة", o: ["نعم", "لا"], c: [1], audioQ: "q13.mp3" },
+];
+
+    let state = { idx: 0, userAnswers: questions.map(() => []), expired: questions.map(() => false), timeLeft: 15, timer: null };
+
+    function startQuiz() {
+        document.getElementById('start-screen').style.display = 'none';
+        loadQ();
+    }
+
+    function loadQ() {
         
-        <!-- Right side moves to top on mobile -->
-        <div class="flex flex-col gap-4 order-1 md:col-span-2">
-            <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
-                <img id="q-img" src="" class="w-full h-full object-cover" alt="Question Image">
+        clearInterval(state.timer);
+        const q = questions[state.idx];
+        document.getElementById('main-container').innerHTML = `
+            <div class="flex flex-col gap-4 order-1 md:col-span-2">
+                <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
+                    <img src="static/images/q${state.idx + 1}.webp" class="w-full h-full object-cover">
+                </div>
+                <div class="glass p-4 rounded-xl border border-slate-700">
+                    <p class="text-lg font-bold mb-2">${q.q}</p>
+                    <div id="options-list" class="space-y-2 text-sm">
+                        ${q.o.map((o, i) => `
+                            <div class="p-3 rounded-xl border border-slate-700 cursor-pointer flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
+                                <span>${o}</span>
+                                <span class="text-slate-500">......... ${i+1}</span>
+                            </div>`).join('')}
+                    </div>
+                </div>
             </div>
-            <div class="glass p-4 rounded-xl border border-slate-700">
-                <p id="q-text" class="text-lg font-bold mb-2">يرجى الضغط على ابدأ...</p>
-                <div id="options" class="space-y-2 text-sm"></div>
-            </div>
-        </div>
+            <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
+                <div id="timer" class="text-center font-bold text-xl text-red-500">15</div>
+                <div class="grid grid-cols-2 gap-2" id="btn-grid">
+                    ${[1,2,3,4].map(n => `<button class="py-4 rounded-xl font-bold border bg-slate-800 border-slate-700" onclick="toggle(${n})" id="btn-${n}">${n}</button>`).join('')}
+                </div>
+                <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
+            </div>`;
+    
+        updateSelectionUI();
+        const audio = document.getElementById('audio-q');
+        audio.src = `static/sounds/${q.audioQ}`;
+        audio.onended = () => startTimer();
+        audio.play();
+    }
 
-        <!-- Left side moves to bottom on mobile -->
-        <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
-            <input type="range" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
-            <div class="grid grid-cols-2 gap-2">
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(1)" id="btn-1">1</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(2)" id="btn-2">2</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(3)" id="btn-3">3</button>
-                <button class="bg-slate-800 py-4 rounded-xl font-bold border border-slate-700" onclick="toggle(4)" id="btn-4">4</button>
-            </div>
-            <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
-        </div>
-    </div>
-
-    <script>
-        const questions = [
-            { q: "وضع صفائح تسجيل مزورة...", o: ["الخيار 1", "الخيار 2", "الخيار 3", "الخيار 4"], c: [1, 2, 4], audioQ: "q1_q.mp3", audioE: "q1_exp.mp3" }
-        ];
-
-        let idx = 0, selected = [];
-
-        function startQuiz() {
-            document.getElementById('start-screen').style.display = 'none';
-            loadQ();
+    function updateSelectionUI() {
+        const answers = state.userAnswers[state.idx];
+        for (let i = 1; i <= 4; i++) {
+            const row = document.getElementById(`row-${i}`);
+            const btn = document.getElementById(`btn-${i}`);
+            if (row && btn) {
+                if (answers.includes(i)) {
+                    row.classList.add('option-active');
+                    btn.classList.add('bg-blue-600');
+                    btn.classList.remove('bg-slate-800');
+                } else {
+                    row.classList.remove('option-active');
+                    btn.classList.remove('bg-blue-600');
+                    btn.classList.add('bg-slate-800');
+                }
+            }
         }
+    }
 
-        function loadQ() {
-            selected = [];
-            const d = questions[idx];
-            document.getElementById('q-img').src = `static/images/q${idx + 1}.webp`;
-            document.getElementById('q-text').innerText = d.q;
-            
-            const qAudio = document.getElementById('audio-q');
-            qAudio.src = `static/sounds/${d.audioQ}`;
-            qAudio.play();
+    function toggle(id) {
+        let arr = state.userAnswers[state.idx];
+        if (arr.includes(id)) state.userAnswers[state.idx] = arr.filter(x => x !== id);
+        else state.userAnswers[state.idx].push(id);
+        updateSelectionUI(); // Updates only CSS, audio continues playing
+    }
 
-            const list = document.getElementById('options');
-            list.innerHTML = '';
-            d.o.forEach((opt, i) => {
-                list.innerHTML += `<div class="p-3 rounded-xl border border-slate-700 cursor-pointer hover:bg-slate-700 flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
-                    <span>${opt}</span>
-                    <span class="text-slate-500 overflow-hidden whitespace-nowrap">......... ${i+1}</span>
-                </div>`;
-            });
-        }
+    function startTimer() {
+        state.timeLeft = 15;
+        state.timer = setInterval(() => {
+            state.timeLeft--;
+            const timerEl = document.getElementById('timer');
+            if(timerEl) timerEl.innerText = state.timeLeft;
+            if (state.timeLeft <= 0) {
+                clearInterval(state.timer);
+                state.expired[state.idx] = true;
+                nextQ();
+            }
+        }, 1000);
+    }
 
-        function toggle(id) {
-            const btn = document.getElementById(`btn-${id}`);
-            const row = document.getElementById(`row-${id}`);
-            const i = selected.indexOf(id);
-            if (i > -1) { selected.splice(i, 1); btn.classList.remove('option-active'); row.classList.remove('option-active'); }
-            else { selected.push(id); btn.classList.add('option-active'); row.classList.add('option-active'); }
-        }
+    function nextQ() {
+        clearInterval(state.timer);
+        if (state.idx < questions.length - 1) { state.idx++; loadQ(); }
+        else showResults();
+    }
 
-        function nextQ() {
-            if (selected.length === 0) return;
-            const exp = document.getElementById('audio-exp');
-            exp.src = `static/sounds/${questions[idx].audioE}`;
-            exp.play();
-            setTimeout(() => { if(idx < questions.length - 1) { idx++; loadQ(); } }, 3000);
-        }
-    </script>
+    function showResults() {
+        let correct = questions.filter((q, i) => !state.expired[i] && JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(q.c.sort())).length;
+        document.getElementById('main-container').innerHTML = `<div class="glass p-10 col-span-3 text-center">
+            <h1 class="text-3xl font-bold">النتيجة: ${correct}/${questions.length}</h1>
+            <div class="mt-6 grid grid-cols-5 gap-2">${questions.map((_, i) => `<button onclick="review(${i})" class="p-4 bg-slate-800 rounded">س${i+1}</button>`).join('')}</div>
+        </div>`;
+    }
+
+    function review(i) {
+        const q = questions[i];
+        document.getElementById('main-container').innerHTML = `<div class="glass p-10 col-span-3">
+            <h2 class="text-xl font-bold mb-4">${q.q}</h2>
+            ${q.o.map((o, n) => `<div class="p-3 mb-2 rounded ${q.c.includes(n+1) ? 'bg-correct' : (state.userAnswers[i].includes(n+1) ? 'bg-wrong' : 'border border-slate-700')}">${o}</div>`).join('')}
+            <p class="mt-4 italic text-sm text-slate-400">${q.exp}</p>
+            <button onclick="showResults()" class="mt-6 bg-blue-600 px-6 py-2 rounded">العودة للنتائج</button>
+        </div>`;
+    }
+</script>
 </body>
 </html>
