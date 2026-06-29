@@ -7,67 +7,100 @@
     <style>
         body { background: #0b1120; color: #cbd5e1; font-family: sans-serif; }
         .glass { background: #1e293b; border: 1px solid #334155; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .answer-btn { background: #334155; border: 1px solid #475569; padding: 1.5rem; text-align: center; border-radius: 4px; font-weight: bold; }
         .selected { border: 2px solid #3b82f6 !important; }
-        .correct { background: #065f46 !important; color: white !important; }
-        .wrong { background: #991b1b !important; color: white !important; }
+        .correct { background: #065f46 !important; border-color: #059669 !important; color: white !important; }
+        .wrong { background: #991b1b !important; border-color: #dc2626 !important; color: white !important; }
     </style>
 </head>
-<body class="p-8">
+<body class="p-6">
 
-    <div id="app" class="max-w-6xl mx-auto grid grid-cols-12 gap-6"></div>
+    <div id="app" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6"></div>
 
     <script>
         const questions = [
-            { id: "q1", q: "وضع صفائح تسجيل مزورة على المركبة بشكل متعمد كاتبترا جنحة كيتعاقب عليها:", o: ["بعقوبة حبسية", "بإيداع المركبة بالحجز", "بإتلاف المركبة", "بمصادرة المركبة لفائدة الدولة"], c: [1, 2] },
-            // Add more questions here following the same format
+            { q: "عند المراقبة في حالة رخصة السياقة مزورة، يمكن للعربة تعرض للحجز:", o: ["نعم", "لا"], c: [1], img: "q1.webp" },
+            { q: "أثناء السير، لازم متوصلش نسبة الكحول في اللتر من الهواء المنبعث من الفم:", o: ["0,02 مليغرام", "0,05 مليغرام", "0,10 مليغرام"], c: [1], img: "q2.webp" }
         ];
 
-        let state = { idx: 0, userAnswers: new Array(questions.length).fill([]), isSubmitted: false };
+        let state = { idx: 0, userAnswers: new Array(questions.length).fill(null).map(() => []), isSubmitted: false, view: 'quiz', timeLeft: 15 };
+        let timerInterval;
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            state.timeLeft = 15;
+            timerInterval = setInterval(() => {
+                state.timeLeft--;
+                if (state.timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    state.isSubmitted = true;
+                    render();
+                    setTimeout(next, 2000);
+                }
+                render();
+            }, 1000);
+        }
 
         function render() {
-            const q = questions[state.idx];
             const app = document.getElementById('app');
-            app.innerHTML = `
-                <!-- Sidebar (Left) -->
-                <div class="col-span-12 md:col-span-3 flex flex-col gap-4">
-                    <div class="glass p-4 rounded text-center">مستوى الصوت</div>
-                    <input type="range" class="w-full mb-4">
-                    <div class="btn-grid">
-                        ${[2, 1, 4, 3].map(num => `
-                            <button onclick="toggle(${num})" class="answer-btn ${state.userAnswers[state.idx].includes(num) ? 'selected' : ''}">
-                                ${num}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <button onclick="state.isSubmitted = true; render();" class="bg-emerald-600 text-white py-3 rounded font-bold mt-2">Valider</button>
-                </div>
+            
+            if (state.view === 'result') {
+                const score = state.userAnswers.filter((ans, i) => JSON.stringify(ans.sort()) === JSON.stringify(questions[i].c.sort())).length;
+                app.innerHTML = `
+                    <div class="col-span-4 glass p-10 rounded-xl text-center">
+                        <h1 class="text-3xl font-bold mb-6">نتيجتك النهائية: ${score} / ${questions.length}</h1>
+                        <div class="grid grid-cols-5 gap-4 mb-8">
+                            ${questions.map((_, i) => {
+                                const isCorrect = JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(questions[i].c.sort());
+                                return `<button onclick="reviewQ(${i})" class="p-4 rounded font-bold ${isCorrect ? 'correct' : 'wrong'}">سؤال ${i + 1}</button>`;
+                            }).join('')}
+                        </div>
+                        <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-xl font-bold">إعادة الاختبار</button>
+                    </div>`;
+                return;
+            }
 
-                <!-- Main Content (Right) -->
-                <div class="col-span-12 md:col-span-9 flex flex-col gap-4">
-                    <div class="glass p-2 rounded"><img src="${q.id}.webp" class="w-full rounded h-80 object-cover"></div>
-                    <div class="glass p-6 rounded text-lg font-bold">${q.q}</div>
-                    <div class="space-y-2">
-                        ${q.o.map((opt, i) => {
-                            const num = i + 1;
-                            let cls = state.isSubmitted ? (q.c.includes(num) ? 'correct' : 'wrong') : '';
-                            return `<div class="glass p-4 rounded border-b border-dashed flex justify-between ${cls}">
-                                        <span>${opt}</span> <span>${num}</span>
-                                    </div>`;
-                        }).join('')}
+            const q = questions[state.idx];
+            app.innerHTML = `
+                <div class="col-span-1 glass p-6 rounded-xl flex flex-col gap-6">
+                    ${state.view === 'quiz' ? `<div class="text-xl font-bold text-center ${state.timeLeft < 5 ? 'text-red-500' : 'text-blue-400'}">الوقت: ${state.timeLeft}</div>` : ''}
+                    <div class="text-sm">السؤال ${state.idx + 1} / ${questions.length}</div>
+                    ${state.view === 'quiz' ? `<button onclick="submit()" class="w-full bg-emerald-600 py-3 rounded font-bold">Valider</button>` : ''}
+                    <button onclick="${state.view === 'review' ? 'state.view = \'result\'; render();' : 'next()'}" class="w-full bg-blue-600 py-3 rounded font-bold">
+                        ${state.view === 'review' ? 'العودة للنتائج' : 'السؤال التالي'}
+                    </button>
+                </div>
+                <div class="col-span-3 flex flex-col gap-6">
+                    <div class="glass p-2 rounded-xl"><img src="static/images/${q.img}" class="w-full rounded-lg"></div>
+                    <div class="glass p-6 rounded-xl">
+                        <h2 class="text-xl mb-6">${q.q}</h2>
+                        <div class="space-y-3">
+                            ${q.o.map((opt, i) => {
+                                const id = i + 1;
+                                const isSel = state.userAnswers[state.idx].includes(id);
+                                let cls = state.isSubmitted ? (questions[state.idx].c.includes(id) ? 'correct' : (isSel ? 'wrong' : '')) : '';
+                                return `<div class="w-full text-right p-4 rounded border border-slate-600 ${isSel?'selected':''} ${cls}">${opt}</div>`;
+                            }).join('')}
+                        </div>
                     </div>
                 </div>`;
         }
 
-        function toggle(num) {
-            if (state.isSubmitted) return;
-            let arr = state.userAnswers[state.idx];
-            if (arr.includes(num)) state.userAnswers[state.idx] = arr.filter(x => x !== num);
-            else state.userAnswers[state.idx].push(num);
+        function reviewQ(i) {
+            state.idx = i;
+            state.view = 'review';
+            state.isSubmitted = true;
             render();
         }
 
+        function toggle(id) { if(!state.isSubmitted && state.view === 'quiz') { const arr = state.userAnswers[state.idx]; const i = arr.indexOf(id); if(i > -1) arr.splice(i, 1); else arr.push(id); render(); } }
+        function submit() { state.isSubmitted = true; clearInterval(timerInterval); render(); }
+        function next() { 
+            clearInterval(timerInterval);
+            if (state.idx < questions.length - 1) { state.idx++; state.isSubmitted = false; startTimer(); render(); } 
+            else { state.view = 'result'; render(); } 
+        }
+
+        startTimer();
         render();
     </script>
 </body>
