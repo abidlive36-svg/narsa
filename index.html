@@ -12,19 +12,23 @@
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
         .bg-correct { background: #065f46 !important; border-color: #059669 !important; }
         .bg-wrong { background: #991b1b !important; border-color: #dc2626 !important; }
-        /* Fix: Ensures images fit the container perfectly without distortion */
-        .quiz-img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden">
 
-    <header class="p-4 bg-slate-900 border-b border-slate-700 font-bold text-center">NARSA Quiz App</header>
+    <header class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+        <button onclick="toggleSidebar()" class="md:hidden text-2xl">☰</button>
+        <div class="font-bold">NARSA Quiz App</div>
+        <div class="w-8"></div> 
+    </header>
 
-    <div class="flex flex-1 overflow-hidden">
-        <aside class="w-64 bg-slate-900 border-l border-slate-700 p-4 overflow-y-auto hidden md:flex flex-col gap-2">
+    <div class="flex flex-1 overflow-hidden relative">
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 w-64 bg-slate-900 border-l border-slate-700 p-4 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 flex flex-col gap-2">
             <h2 class="font-bold mb-4">قائمة التحكم</h2>
             <button onclick="location.reload()" class="text-right p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition">العودة للبداية</button>
         </aside>
+
+        <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 hidden md:hidden z-40"></div>
 
         <main id="main-container" class="flex-1 p-4 overflow-y-auto flex items-center justify-center">
             <div id="start-screen" class="text-center">
@@ -48,6 +52,13 @@
 
     let state = { idx: 0, userAnswers: questions.map(() => []) };
 
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('hidden');
+    }
+
     function stopAudio() {
         const audioQ = document.getElementById('audio-q');
         const audioExp = document.getElementById('audio-exp');
@@ -66,13 +77,13 @@
         document.getElementById('main-container').innerHTML = `
             <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2">
-                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden flex items-center justify-center" style="height: 350px;">
-                        <img src="static/images/${q.img}" style="width: 100%; height: 100%; object-fit: fill;">
+                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden aspect-video flex items-center justify-center">
+                        <img src="static/images/${q.img}" class="w-full h-full object-fill">
                     </div>
                     <div class="glass p-4 mt-4 rounded-xl border border-slate-700">
                         <p class="text-lg font-bold mb-4">${q.q}</p>
                         <div class="space-y-2">
-                            ${q.o.map((o, i) => `<button class="w-full p-3 text-right rounded-xl border border-slate-700 hover:bg-slate-800" onclick="toggle(${i+1})" id="row-${i+1}">${o}</button>`).join('')}
+                            ${q.o.map((o, i) => `<button class="w-full p-3 flex items-center rounded-xl border border-slate-700 hover:bg-slate-800" onclick="toggle(${i+1})" id="row-${i+1}"><span class="ml-auto font-mono">${i+1}...............</span> ${o}</button>`).join('')}
                         </div>
                     </div>
                 </div>
@@ -93,7 +104,12 @@
     }
 
     function toggle(id) {
-        state.userAnswers[state.idx] = [id];
+        const answers = state.userAnswers[state.idx];
+        if (answers.includes(id)) {
+            state.userAnswers[state.idx] = answers.filter(a => a !== id);
+        } else {
+            state.userAnswers[state.idx].push(id);
+        }
         updateSelectionUI();
     }
 
@@ -117,12 +133,12 @@
         document.getElementById('main-container').innerHTML = `
             <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2">
-                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden flex items-center justify-center" style="height: 350px;">
-                        <img src="static/images/${q.img}" style="width: 100%; height: 100%; object-fit: fill;">
+                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden aspect-video flex items-center justify-center">
+                        <img src="static/images/${q.img}" class="w-full h-full object-fill">
                     </div>
                     <div class="glass p-4 mt-4 rounded-xl border border-slate-700">
                         <p class="text-lg font-bold mb-4">${q.q}</p>
-                        <div class="space-y-2">${q.o.map((o, n) => `<div class="p-3 rounded-xl border ${q.c.includes(n+1) ? 'bg-correct' : (state.userAnswers[i].includes(n+1) ? 'bg-wrong' : 'border-slate-700')}">${o}</div>`).join('')}</div>
+                        <div class="space-y-2">${q.o.map((o, n) => `<div class="p-3 flex items-center rounded-xl border ${q.c.includes(n+1) ? 'bg-correct' : (state.userAnswers[i].includes(n+1) ? 'bg-wrong' : 'border-slate-700')}"><span class="ml-auto font-mono">${n+1}...............</span> ${o}</div>`).join('')}</div>
                         <div class="mt-4 p-4 bg-slate-800 rounded-lg">
                             <p class="mb-2 text-sm">${q.exp}</p>
                             <button onclick="playExpSpecific(${i})" class="bg-blue-700 px-4 py-2 rounded text-xs font-bold w-full">Listen to Explanation</button>
