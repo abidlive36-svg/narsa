@@ -3,39 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NARSA Quiz</title>
+    <title>NARSA Quiz App</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body { font-family: 'Tajawal', sans-serif; background: #0f172a; }
+        body { font-family: 'Tajawal', sans-serif; background: #0f172a; color: #e2e8f0; }
         .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .option-active { background: #3b82f6 !important; color: white; border-color: #60a5fa !important; }
         .bg-correct { background: #065f46 !important; border-color: #059669 !important; }
         .bg-wrong { background: #991b1b !important; border-color: #dc2626 !important; }
+        /* Fix: Ensures images fit the container perfectly without distortion */
+        .quiz-img { width: 100%; height: 100%; object-fit: contain; }
     </style>
 </head>
-<body class="min-h-screen p-2 flex flex-col text-slate-200">
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <div id="start-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950">
-        <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
+    <header class="p-4 bg-slate-900 border-b border-slate-700 font-bold text-center">NARSA Quiz App</header>
+
+    <div class="flex flex-1 overflow-hidden">
+        <aside class="w-64 bg-slate-900 border-l border-slate-700 p-4 overflow-y-auto hidden md:flex flex-col gap-2">
+            <h2 class="font-bold mb-4">قائمة التحكم</h2>
+            <button onclick="location.reload()" class="text-right p-3 bg-slate-800 rounded-lg hover:bg-slate-700 transition">العودة للبداية</button>
+        </aside>
+
+        <main id="main-container" class="flex-1 p-4 overflow-y-auto flex items-center justify-center">
+            <div id="start-screen" class="text-center">
+                <h1 class="text-3xl font-bold mb-6">مرحباً بك في اختبار رخصة السياقة</h1>
+                <button onclick="startQuiz()" class="bg-blue-600 text-white px-10 py-5 rounded-2xl text-2xl font-bold hover:bg-blue-500">ابدأ الاختبار</button>
+            </div>
+        </main>
     </div>
 
     <audio id="audio-q"></audio>
     <audio id="audio-exp"></audio>
 
-    <div id="main-container" class="max-w-5xl mx-auto w-full flex flex-col md:grid md:grid-cols-3 gap-4 mt-4">
-        </div>
-
 <script>
-const questions = [
-    { q: "تقرب من طريق فيها حدبات؟", o: ["نعم", "لا"], c: [1], audioQ: "q8.mp3" },
-    { q: "كيشمل خصم النقط فنفس الوقت جميع أصناف رخصة السياقة اللي حصلت عليها:", o: ["صحيح", "خطأ"], c: [1], audioQ: "q10.mp3" },
-    { q: "هاد العلامة كتعلم على:", o: ["طريق ذات أولوية عند ملتقى الطرق اللي جاي", "طريق ذات أولوية المرور", "ملتقى الطرق", "حق الأسبقية للي جاي من ليمن"], c: [1], audioQ: "q11.mp3" },
-    { q: "كتمكن تقنية البلوتوث من ربط الهاتف النقال بالنظام المدمج للسيارة:", o: ["نعم", "لا"], c: [1], audioQ: "q12.mp3" },
-    { q: "هاد اللوحة كتعلم على: محطة الاستراحة", o: ["نعم", "لا"], c: [1], audioQ: "q13.mp3" },
-];
+    const questions = [
+        { q: "تقرب من طريق فيها حدبات؟", o: ["نعم", "لا"], c: [1], img: "q1.webp", audioQ: "q8.mp3", audioE: "exp8.mp3", exp: "الحدبات تتطلب تخفيف السرعة لتجنب الأضرار." },
+        { q: "كيشمل خصم النقط فنفس الوقت جميع أصناف رخصة السياقة اللي حصلت عليها:", o: ["صحيح", "خطأ"], c: [1], img: "q2.webp", audioQ: "q10.mp3", audioE: "exp10.mp3", exp: "خصم النقاط يؤثر على رصيد السائق في كافة الأصناف." },
+        { q: "هاد العلامة كتعلم على:", o: ["طريق ذات أولوية عند ملتقى الطرق اللي جاي", "طريق ذات أولوية المرور", "ملتقى الطرق", "حق الأسبقية للي جاي من ليمن"], c: [1], img: "q3.webp", audioQ: "q11.mp3", audioE: "exp11.mp3", exp: "العلامة تشير إلى أولوية المرور في ملتقى الطرق القادم." },
+        { q: "كتمكن تقنية البلوتوث من ربط الهاتف النقال بالنظام المدمج للسيارة:", o: ["نعم", "لا"], c: [1], img: "q4.webp", audioQ: "q12.mp3", audioE: "exp12.mp3", exp: "تقنية البلوتوث تزيد من السلامة داخل المركبة." },
+        { q: "هاد اللوحة كتعلم على: محطة الاستراحة", o: ["نعم", "لا"], c: [1], img: "q5.webp", audioQ: "q13.mp3", audioE: "exp13.mp3", exp: "لوحة تشير إلى وجود مكان مخصص للراحة." },
+    ];
 
-    let state = { idx: 0, userAnswers: questions.map(() => []), expired: questions.map(() => false), timeLeft: 15, timer: null };
+    let state = { idx: 0, userAnswers: questions.map(() => []) };
+
+    function stopAudio() {
+        const audioQ = document.getElementById('audio-q');
+        const audioExp = document.getElementById('audio-exp');
+        audioQ.pause(); audioQ.currentTime = 0;
+        audioExp.pause(); audioExp.currentTime = 0;
+    }
 
     function startQuiz() {
         document.getElementById('start-screen').style.display = 'none';
@@ -43,102 +61,82 @@ const questions = [
     }
 
     function loadQ() {
-        
-        clearInterval(state.timer);
+        stopAudio();
         const q = questions[state.idx];
         document.getElementById('main-container').innerHTML = `
-            <div class="flex flex-col gap-4 order-1 md:col-span-2">
-                <div class="bg-slate-950 rounded-xl border border-slate-700 aspect-video flex items-center justify-center overflow-hidden">
-                    <img src="static/images/q${state.idx + 1}.webp" class="w-full h-full object-cover">
-                </div>
-                <div class="glass p-4 rounded-xl border border-slate-700">
-                    <p class="text-lg font-bold mb-2">${q.q}</p>
-                    <div id="options-list" class="space-y-2 text-sm">
-                        ${q.o.map((o, i) => `
-                            <div class="p-3 rounded-xl border border-slate-700 cursor-pointer flex justify-between items-center" onclick="toggle(${i+1})" id="row-${i+1}">
-                                <span>${o}</span>
-                                <span class="text-slate-500">......... ${i+1}</span>
-                            </div>`).join('')}
+            <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden flex items-center justify-center" style="height: 350px;">
+                        <img src="static/images/${q.img}" style="width: 100%; height: 100%; object-fit: fill;">
+                    </div>
+                    <div class="glass p-4 mt-4 rounded-xl border border-slate-700">
+                        <p class="text-lg font-bold mb-4">${q.q}</p>
+                        <div class="space-y-2">
+                            ${q.o.map((o, i) => `<button class="w-full p-3 text-right rounded-xl border border-slate-700 hover:bg-slate-800" onclick="toggle(${i+1})" id="row-${i+1}">${o}</button>`).join('')}
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="glass rounded-xl p-4 border border-slate-700 flex flex-col gap-4 order-2">
-                <div id="timer" class="text-center font-bold text-xl text-red-500">15</div>
-                <div class="grid grid-cols-2 gap-2" id="btn-grid">
-                    ${[1,2,3,4].map(n => `<button class="py-4 rounded-xl font-bold border bg-slate-800 border-slate-700" onclick="toggle(${n})" id="btn-${n}">${n}</button>`).join('')}
-                </div>
-                <button onclick="nextQ()" class="bg-emerald-600 py-4 rounded-xl font-bold text-lg">Valider</button>
+                <button onclick="nextQ()" class="bg-emerald-600 py-3 rounded-xl font-bold h-14">Validate</button>
             </div>`;
-    
         updateSelectionUI();
         const audio = document.getElementById('audio-q');
         audio.src = `static/sounds/${q.audioQ}`;
-        audio.onended = () => startTimer();
-        audio.play();
+        audio.play().catch(e => console.log(e));
     }
 
     function updateSelectionUI() {
         const answers = state.userAnswers[state.idx];
         for (let i = 1; i <= 4; i++) {
-            const row = document.getElementById(`row-${i}`);
-            const btn = document.getElementById(`btn-${i}`);
-            if (row && btn) {
-                if (answers.includes(i)) {
-                    row.classList.add('option-active');
-                    btn.classList.add('bg-blue-600');
-                    btn.classList.remove('bg-slate-800');
-                } else {
-                    row.classList.remove('option-active');
-                    btn.classList.remove('bg-blue-600');
-                    btn.classList.add('bg-slate-800');
-                }
-            }
+            const btn = document.getElementById(`row-${i}`);
+            if (btn) btn.classList.toggle('option-active', answers.includes(i));
         }
     }
 
     function toggle(id) {
-        let arr = state.userAnswers[state.idx];
-        if (arr.includes(id)) state.userAnswers[state.idx] = arr.filter(x => x !== id);
-        else state.userAnswers[state.idx].push(id);
-        updateSelectionUI(); // Updates only CSS, audio continues playing
-    }
-
-    function startTimer() {
-        state.timeLeft = 15;
-        state.timer = setInterval(() => {
-            state.timeLeft--;
-            const timerEl = document.getElementById('timer');
-            if(timerEl) timerEl.innerText = state.timeLeft;
-            if (state.timeLeft <= 0) {
-                clearInterval(state.timer);
-                state.expired[state.idx] = true;
-                nextQ();
-            }
-        }, 1000);
+        state.userAnswers[state.idx] = [id];
+        updateSelectionUI();
     }
 
     function nextQ() {
-        clearInterval(state.timer);
         if (state.idx < questions.length - 1) { state.idx++; loadQ(); }
         else showResults();
     }
 
     function showResults() {
-        let correct = questions.filter((q, i) => !state.expired[i] && JSON.stringify(state.userAnswers[i].sort()) === JSON.stringify(q.c.sort())).length;
-        document.getElementById('main-container').innerHTML = `<div class="glass p-10 col-span-3 text-center">
-            <h1 class="text-3xl font-bold">النتيجة: ${correct}/${questions.length}</h1>
-            <div class="mt-6 grid grid-cols-5 gap-2">${questions.map((_, i) => `<button onclick="review(${i})" class="p-4 bg-slate-800 rounded">س${i+1}</button>`).join('')}</div>
-        </div>`;
+        stopAudio();
+        document.getElementById('main-container').innerHTML = `
+            <div class="glass p-10 text-center w-full max-w-2xl">
+                <h1 class="text-3xl font-bold mb-6">انتهى الاختبار</h1>
+                <div class="grid grid-cols-5 gap-2">${questions.map((_, i) => `<button onclick="review(${i})" class="p-4 bg-slate-800 rounded-lg hover:bg-slate-700">Q${i+1}</button>`).join('')}</div>
+            </div>`;
     }
 
     function review(i) {
+        stopAudio();
         const q = questions[i];
-        document.getElementById('main-container').innerHTML = `<div class="glass p-10 col-span-3">
-            <h2 class="text-xl font-bold mb-4">${q.q}</h2>
-            ${q.o.map((o, n) => `<div class="p-3 mb-2 rounded ${q.c.includes(n+1) ? 'bg-correct' : (state.userAnswers[i].includes(n+1) ? 'bg-wrong' : 'border border-slate-700')}">${o}</div>`).join('')}
-            <p class="mt-4 italic text-sm text-slate-400">${q.exp}</p>
-            <button onclick="showResults()" class="mt-6 bg-blue-600 px-6 py-2 rounded">العودة للنتائج</button>
-        </div>`;
+        document.getElementById('main-container').innerHTML = `
+            <div class="max-w-4xl w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2">
+                    <div class="bg-slate-950 rounded-xl border border-slate-700 w-full overflow-hidden flex items-center justify-center" style="height: 350px;">
+                        <img src="static/images/${q.img}" style="width: 100%; height: 100%; object-fit: fill;">
+                    </div>
+                    <div class="glass p-4 mt-4 rounded-xl border border-slate-700">
+                        <p class="text-lg font-bold mb-4">${q.q}</p>
+                        <div class="space-y-2">${q.o.map((o, n) => `<div class="p-3 rounded-xl border ${q.c.includes(n+1) ? 'bg-correct' : (state.userAnswers[i].includes(n+1) ? 'bg-wrong' : 'border-slate-700')}">${o}</div>`).join('')}</div>
+                        <div class="mt-4 p-4 bg-slate-800 rounded-lg">
+                            <p class="mb-2 text-sm">${q.exp}</p>
+                            <button onclick="playExpSpecific(${i})" class="bg-blue-700 px-4 py-2 rounded text-xs font-bold w-full">Listen to Explanation</button>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="showResults()" class="h-14 bg-slate-600 rounded-xl font-bold">Back to Results</button>
+            </div>`;
+    }
+
+    function playExpSpecific(i) {
+        const expAudio = document.getElementById('audio-exp');
+        expAudio.src = `static/sounds/${questions[i].audioE}`;
+        expAudio.play().catch(e => console.log(e));
     }
 </script>
 </body>
